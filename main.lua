@@ -20,6 +20,12 @@ function love.draw()
 	drawBlocks()
 end
 
+function love.keypressed(key, isRepeat)
+	if(key == " ") then
+		punchBlock()
+	end
+end
+
 function checkCollisions(dt)
 	for i, block in ipairs(blocks) do
 		if checkCollision(hero.x, hero.y, hero.width, hero.height, block.x, block.y, block.width, block.height) then

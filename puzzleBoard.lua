@@ -1,5 +1,6 @@
 --puzzleBoard.lua
 require 'block'
+require 'boundingBox'
 
 tile = {}
 
@@ -14,8 +15,8 @@ function initPuzzleBoard()
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,1,0,0,0,0,0},
+	{0,0,0,0,1,0,0,0,0,0},
 	{0,0,0,0,1,1,0,0,0,0},
 	{1,1,1,1,1,1,1,0,1,1},
 	}
@@ -30,14 +31,12 @@ function initPuzzleBoard()
 	tileW = 40
 	tileH = 40
 
-	drawMap()
+	createBlocks()
 end
 
-function drawMap()
+function createBlocks()
 	offsetX = -20--mapX % tileW
 	offsetY = 0--mapY % tileH
-	firstTileX = math.floor(mapX / tileW)
-	firstTileY = math.floor(mapY / tileH)
 
 	for y=1, mapH do
 		for x=1, mapW do

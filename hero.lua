@@ -35,10 +35,6 @@ function handleInput(dt)
 	if(love.keyboard.isDown("up")) then
 		moveHero(0, -hero.speed*dt)
 	end
-
-	if(love.keyboard.isDown(" ")) then
-		punchBlock()
-	end
 end
 
 function moveHero(dx, dy)
@@ -47,9 +43,10 @@ function moveHero(dx, dy)
 end
 
 function drawHero()
+	local pr, pg, pb, pa = love.graphics.getColor()
 	love.graphics.setColor(255, 0, 0)
 	love.graphics.rectangle("fill", hero.x, hero.y, hero.width, hero.height)
-	love.graphics.setColor(255, 255, 255)
+	love.graphics.setColor(pr, pg, pb, pa)
 end
 
 function heroHitBlock(block)
@@ -63,5 +60,28 @@ function heroHitBlock(block)
 end
 
 function punchBlock()
-	print("PUNCH")
+	local tX = getHeroTileX()
+	local tY = getHeroTileY()
+
+	if(tY+1 < mapH and map[tY+1][tX] == 1) then
+		--map[tY+1][tX] = map[mapH][tx]
+		local cnt = mapH-tY+1
+		for px = 0, cnt do
+			local firstBlock = getBlockAtTilePos(tX, tY+1+px)
+			if firstBlock then
+				firstBlock.y = firstBlock.y - firstBlock.height
+			end
+		end
+		local lastBlock = getBlockAtTilePos(tX, tY)
+		lastBlock.y = love.window.getHeight() - lastBlock.height
+		--print("Hit block: " .. tX .. ":" .. (tY+1))
+	end
+end
+
+function getHeroTileX()
+	return math.floor((hero.x+hero.width/2)/love.window.getWidth()*mapW) + 1
+end
+
+function getHeroTileY()
+	return math.floor((hero.y+hero.height/2)/love.window.getHeight()*mapH) + 1
 end
