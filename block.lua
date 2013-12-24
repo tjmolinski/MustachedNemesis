@@ -6,10 +6,32 @@ function initBlock(newX, newY)
 	block.height = 40
 	block.x = newX
 	block.y = newY
-	block.cr = love.math.random(255)
-	block.cg = love.math.random(255)
-	block.cb = love.math.random(255)
+	getColor(love.math.random(4))
 	table.insert(blocks, block)
+end
+
+function getColor(type)
+	if type == 0 then
+		block.cr = 255
+		block.cg = 0
+		block.cb = 0
+	elseif type == 1 then
+		block.cr = 0
+		block.cg = 255
+		block.cb = 0
+	elseif type == 2 then
+		block.cr = 0
+		block.cg = 0
+		block.cb = 255
+	elseif type == 3 then
+		block.cr = 255
+		block.cg = 0
+		block.cb = 255
+	else
+		block.cr = 0
+		block.cg = 255
+		block.cb = 255
+	end
 end
 
 function updateBlocks()
@@ -23,7 +45,7 @@ end
 
 function drawBlock(block)
 	local pr, pg, pb, pa = love.graphics.getColor()
-	love.graphics.setColor(125, 125, 125)
+	love.graphics.setColor(0,0,0)
 	love.graphics.rectangle("line", block.x, block.y, block.width, block.height)
 	love.graphics.setColor(block.cr, block.cg, block.cb)
 	love.graphics.rectangle("fill", block.x, block.y, block.width, block.height)
