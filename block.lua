@@ -8,9 +8,11 @@ function initBlock(newX, newY)
 	block.y = newY
 	getColor(love.math.random(4))
 	table.insert(blocks, block)
+	map[getBlockTileY(block)][getBlockTileX(block)] = block.mapId
 end
 
 function getColor(type)
+	block.mapId = type
 	if type == 0 then
 		block.cr = 255
 		block.cg = 0

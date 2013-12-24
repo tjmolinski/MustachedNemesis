@@ -63,18 +63,25 @@ function punchBlock()
 	local tX = getHeroTileX()
 	local tY = getHeroTileY()
 
-	if(tY+1 < mapH and map[tY+1][tX] == 1) then
-		--map[tY+1][tX] = map[mapH][tx]
+	if(tY+1 < mapH and map[tY+1][tX] > 0) then
 		local cnt = mapH-tY+1
 		for px = 0, cnt do
 			local firstBlock = getBlockAtTilePos(tX, tY+1+px)
 			if firstBlock then
 				firstBlock.y = firstBlock.y - firstBlock.height
+				map[tY+1+px][tX] = 0
+				map[tY+px][tX] = firstBlock.mapId
 			end
 		end
 		local lastBlock = getBlockAtTilePos(tX, tY)
 		lastBlock.y = love.window.getHeight() - lastBlock.height
-		--print("Hit block: " .. tX .. ":" .. (tY+1))
+		map[tY][tX] = 0
+		map[mapH][tX] = lastBlock.mapId
+
+		for y = 1, mapH do
+			print(map[y][1].." "..map[y][2].." "..map[y][3].." "..map[y][4].." "..map[y][5].." "..map[y][6].." "..map[y][7].." "..map[y][8].." "..map[y][9].." "..map[y][10])
+		end
+		print("=====================================")
 	end
 end
 
