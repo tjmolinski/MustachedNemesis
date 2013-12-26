@@ -46,3 +46,43 @@ function createBlocks()
 		end
 	end
 end
+
+function checkForDownMatches(x, y)
+	local matches = {}
+	for ty=y, mapH do
+		local color = map[ty][x]
+		local tempMatches = {}
+		for tx=x+1, mapW do
+			if color == map[ty][tx] then
+				table.insert(tempMatches, (ty*mapH)+tx)
+			else
+				break
+			end
+		end
+		for tx=0, x do
+			if color == map[ty][x-tx] then
+				table.insert(tempMatches, (ty*mapH)+(x-tx))
+			else
+				break
+			end
+		end
+		if size(tempMatches) > 2 then
+			--table.insert(matches, tempMatches)
+			print("Pairs found")
+			for idx=1, size(tempMatches) do
+				local tempBlock = getBlockAtTilePos(tempMatches[idx]%mapH,math.floor(tempMatches[idx]/mapH))
+				removeBlock(tempBlock) 
+				print("pair :"..math.floor((tempMatches[idx]/mapH))..":"..(tempMatches[idx]%mapH))
+			end
+			print("End pairs found")
+		end
+	end
+end
+
+function size(tble)
+	local cnt = 0
+	for tble in pairs(tble) do
+		cnt = 1 + cnt
+	end
+	return cnt
+end

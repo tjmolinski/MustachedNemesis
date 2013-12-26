@@ -12,6 +12,7 @@ end
 
 function love.update(dt)
 	updateHero(dt)
+	updateBlocks()
 	checkCollisions(dt)
 end
 

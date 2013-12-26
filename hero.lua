@@ -1,5 +1,6 @@
 --hero.lua
 require 'block'
+require 'puzzleBoard'
 
 hero = {}
 
@@ -82,6 +83,7 @@ function punchBlock()
 			print(map[y][1].." "..map[y][2].." "..map[y][3].." "..map[y][4].." "..map[y][5].." "..map[y][6].." "..map[y][7].." "..map[y][8].." "..map[y][9].." "..map[y][10])
 		end
 		print("=====================================")
+		checkForDownMatches(tX, tY+1)
 	end
 end
 

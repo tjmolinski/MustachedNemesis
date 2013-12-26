@@ -37,6 +37,17 @@ function getColor(type)
 end
 
 function updateBlocks()
+	for i, block in ipairs(blocks) do
+		local bx = getBlockTileX(block)
+		local by = getBlockTileY(block)
+		if by+1 <= mapH then
+		if not getBlockAtTilePos(bx, by+1) then
+			block.y = block.y + block.height
+			map[by][bx] = 0
+			map[by+1][bx] = block.mapId
+		end
+		end
+	end
 end
 
 function drawBlocks()
@@ -58,6 +69,17 @@ function getBlockAtTilePos(tX, tY)
 	for i, block in ipairs(blocks) do
 		if(getBlockTileX(block) == tX and getBlockTileY(block) == tY) then
 			return block
+		end
+	end
+end
+
+function removeBlock(temp)
+	for i, block in ipairs(blocks) do
+		if(block.x == temp.x and block.y == temp.y) then
+			local bx = getBlockTileX(block)
+			local by = getBlockTileY(block)
+			map[by][bx] = 0
+			table.remove(blocks, i)
 		end
 	end
 end
