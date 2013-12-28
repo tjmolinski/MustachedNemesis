@@ -79,6 +79,24 @@ function checkForDownMatches(x, y)
 	end
 end
 
+function addRowOfBlocks()
+	offsetX = -20--mapX % tileW
+	offsetY = 0--mapY % tileH
+	for y=1, mapH do
+		for x=1, mapW do
+			local block = getBlockAtTilePos(x, y);
+			if block then
+				block.y = block.y - block.height;
+				map[y][x] = 0;	
+				map[y-1][x] = block.mapId;	
+			end
+		end
+	end
+	for x=1, mapH do
+		initBlock(((x-1)*tileW) - offsetX - tileW/2, ((mapH-1)*tileH) - offsetY - tileH/2)
+	end
+end
+
 function size(tble)
 	local cnt = 0
 	for tble in pairs(tble) do

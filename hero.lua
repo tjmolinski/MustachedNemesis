@@ -11,6 +11,11 @@ function initHero()
 	hero.height = 20 
 	hero.speed = 150
 	hero.gravity = 59.8
+	hero.direction = 0
+end
+
+function liftHero()
+	hero.y = hero.y - block.height
 end
 
 function updateHero(dt)
@@ -27,14 +32,19 @@ function handlePhysics(dt)
 end
 
 function handleInput(dt)
-	if(love.keyboard.isDown("left")) then
+	if love.keyboard.isDown("left") then
 		moveHero(-hero.speed*dt, 0)
+		hero.direction = -1
 	end
-	if(love.keyboard.isDown("right")) then
+	if love.keyboard.isDown("right") then
 		moveHero(hero.speed*dt, 0)
+		hero.direction = 1
 	end
-	if(love.keyboard.isDown("up")) then
+	if love.keyboard.isDown("up")  then
 		moveHero(0, -hero.speed*dt)
+	end
+	if love.keyboard.isDown("down") then
+		hero.direction = 0
 	end
 end
 
@@ -60,7 +70,49 @@ function heroHitBlock(block)
 	end
 end
 
-function punchBlock()
+function punchBlockRight()
+	local tX = getHeroTileX()
+	local tY = getHeroTileY()
+
+	if(tX+1 < mapW and map[tY][tX+1] > 0) then
+		local cnt = mapW-tX+1
+		for px = 0, cnt do
+			local firstBlock = getBlockAtTilePos(tX+1+px, tY)
+			if firstBlock then
+				firstBlock.x = firstBlock.x - firstBlock.width
+				map[tY][tX+1+px] = 0
+				map[tY][tX+px] = firstBlock.mapId
+			end
+		end
+		local lastBlock = getBlockAtTilePos(tX, tY)
+		lastBlock.x = love.window.getWidth() - lastBlock.width
+		map[tY][tX] = 0
+		map[tY][mapW] = lastBlock.mapId
+	end
+end
+
+function punchBlockLeft()
+	local tX = getHeroTileX()
+	local tY = getHeroTileY()
+
+	if(tX-1 > 0 and map[tY][tX-1] > 0) then
+		local cnt = tX-1
+		for px = 0, cnt do
+			local firstBlock = getBlockAtTilePos(tX-1-px, tY)
+			if firstBlock then
+				firstBlock.x = firstBlock.x + firstBlock.width
+				map[tY][tX-1-px] = 0
+				map[tY][tX-px] = firstBlock.mapId
+			end
+		end
+		local lastBlock = getBlockAtTilePos(tX, tY)
+		lastBlock.x = 0
+		map[tY][tX] = 0
+		map[tY][1] = lastBlock.mapId
+	end
+end
+
+function punchBlockDown()
 	local tX = getHeroTileX()
 	local tY = getHeroTileY()
 

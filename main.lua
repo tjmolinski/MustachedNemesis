@@ -4,6 +4,10 @@ require 'puzzleBoard'
 require 'block'
 require 'boundingBox'
 
+local elapsedTime = 0;
+local growBuffer = 0;
+local growTime = 5;
+
 function love.load(args)
 	love.window.setMode(400, 500, {} )
 	initHero()
@@ -11,6 +15,14 @@ function love.load(args)
 end
 
 function love.update(dt)
+	elapsedTime = elapsedTime + dt;
+	if growBuffer > growTime then
+		growBuffer = 0;
+		liftHero();
+		addRowOfBlocks();
+	else
+		growBuffer = growBuffer + dt;
+	end
 	updateHero(dt)
 	updateBlocks()
 	checkCollisions(dt)
@@ -22,8 +34,12 @@ function love.draw()
 end
 
 function love.keypressed(key, isRepeat)
-	if(key == " ") then
-		punchBlock()
+	if key == " " and hero.direction == 0  then
+		punchBlockDown()
+	elseif key == " " and hero.direction == 1 then
+		punchBlockRight()
+	elseif key == " " and hero.direction == -1 then
+		punchBlockLeft()
 	end
 end
 
