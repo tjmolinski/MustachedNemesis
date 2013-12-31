@@ -41,7 +41,7 @@ function createBlocks()
 	for y=1, mapH do
 		for x=1, mapW do
 			if map[y][x] == 1 then
-				initBlock(((x-1)*tileW) - offsetX - tileW/2, ((y-1)*tileH) - offsetY - tileH/2)
+				initBlock(((x-1)*tileW) - offsetX - tileW/2, ((y-1)*tileH) - offsetY - tileH/2, x, y)
 			end
 		end
 	end
@@ -86,14 +86,16 @@ function addRowOfBlocks()
 		for x=1, mapW do
 			local block = getBlockAtTilePos(x, y);
 			if block then
-				block.y = block.y - block.height;
+				startTween(block, block.x, block.y - block.height)
 				map[y][x] = 0;	
 				map[y-1][x] = block.mapId;	
+				block.mapX = x
+				block.mapY = y-1
 			end
 		end
 	end
 	for x=1, mapH do
-		initBlock(((x-1)*tileW) - offsetX - tileW/2, ((mapH-1)*tileH) - offsetY - tileH/2)
+		initBlock(((x-1)*tileW) - offsetX - tileW/2, ((mapH-1)*tileH) - offsetY - tileH/2, x, mapH)
 	end
 end
 

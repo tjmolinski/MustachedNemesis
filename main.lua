@@ -4,7 +4,8 @@ require 'puzzleBoard'
 require 'block'
 require 'boundingBox'
 
-local elapsedTime = 0;
+elapsedTime = 0;
+blocks = {}
 local growBuffer = 0;
 local growTime = 5;
 
@@ -24,7 +25,9 @@ function love.update(dt)
 		growBuffer = growBuffer + dt;
 	end
 	updateHero(dt)
-	updateBlocks()
+	for i, block in ipairs(blocks) do
+		updateBlock(block, dt)
+	end
 	checkCollisions(dt)
 end
 

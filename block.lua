@@ -1,14 +1,16 @@
-blocks = {}
-
-function initBlock(newX, newY)
+function initBlock(newX, newY, mapX, mapY)
 	block = {}
 	block.width = 40
 	block.height = 40
 	block.x = newX
 	block.y = newY
+	block.mapX = mapX
+	block.mapY = mapY
+	block.state = "notTween"
 	getColor(love.math.random(4))
 	table.insert(blocks, block)
 	map[getBlockTileY(block)][getBlockTileX(block)] = block.mapId
+	return block
 end
 
 function getColor(type)
@@ -36,8 +38,35 @@ function getColor(type)
 	end
 end
 
-function updateBlocks()
-	for i, block in ipairs(blocks) do
+function startTween(block, tx, ty)
+	block.tweenX = tx
+	block.tweenY = ty	
+	block.startX = block.x
+	block.startY = block.y
+	block.state = "tween"
+end
+
+function isNear(pos1, pos2)
+	return pos1-20.0 < pos2 and pos1+20.0 > pos2
+end
+
+function updateBlock(block, dt)
+	if block.state == "tween" then
+		if block.x == block.tweenX and block.y == block.tweenY then
+			block.state = "notTween"
+		else
+			if not isNear(block.x, block.tweenX) then
+			block.x = tween(elapsedTime, block.x, block.tweenX - block.startX, 100)
+			else
+			block.x = block.tweenX
+			end
+			if not isNear(block.y, block.tweenY) then
+			block.y = tween(elapsedTime, block.y, block.tweenY - block.startY, 100)
+			else
+			block.y = block.tweenY
+			end
+		end	
+	else
 		local bx = getBlockTileX(block)
 		local by = getBlockTileY(block)
 		if by+1 <= mapH then
@@ -48,6 +77,10 @@ function updateBlocks()
 		end
 		end
 	end
+end
+
+function tween(et, begin, change, duration)
+	return change * et / duration + begin
 end
 
 function drawBlocks()
@@ -67,7 +100,7 @@ end
 
 function getBlockAtTilePos(tX, tY)
 	for i, block in ipairs(blocks) do
-		if(getBlockTileX(block) == tX and getBlockTileY(block) == tY) then
+		if(block.mapX == tX and block.mapY == tY) then
 			return block
 		end
 	end

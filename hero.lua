@@ -79,15 +79,19 @@ function punchBlockRight()
 		for px = 0, cnt do
 			local firstBlock = getBlockAtTilePos(tX+1+px, tY)
 			if firstBlock then
-				firstBlock.x = firstBlock.x - firstBlock.width
+				startTween(firstBlock, firstBlock.x - firstBlock.width, firstBlock.y)
 				map[tY][tX+1+px] = 0
 				map[tY][tX+px] = firstBlock.mapId
+				firstBlock.mapX = tX+px
+				firstBlock.mapY = tY
 			end
 		end
 		local lastBlock = getBlockAtTilePos(tX, tY)
-		lastBlock.x = love.window.getWidth() - lastBlock.width
+		startTween(lastBlock, love.window.getWidth() - lastBlock.width, lastBlock.y)
 		map[tY][tX] = 0
 		map[tY][mapW] = lastBlock.mapId
+		lastBlock.mapX = mapW
+		lastBlock.mapY = tY
 	end
 end
 
@@ -100,15 +104,19 @@ function punchBlockLeft()
 		for px = 0, cnt do
 			local firstBlock = getBlockAtTilePos(tX-1-px, tY)
 			if firstBlock then
-				firstBlock.x = firstBlock.x + firstBlock.width
+				startTween(firstBlock, firstBlock.x + firstBlock.width, firstBlock.y)
 				map[tY][tX-1-px] = 0
 				map[tY][tX-px] = firstBlock.mapId
+				firstBlock.mapX = tX-px
+				firstBlock.mapY = tY
 			end
 		end
 		local lastBlock = getBlockAtTilePos(tX, tY)
-		lastBlock.x = 0
+		startTween(lastBlock, 0, lastBlock.y)
 		map[tY][tX] = 0
 		map[tY][1] = lastBlock.mapId
+		lastBlock.mapX = 1
+		lastBlock.mapY = tY
 	end
 end
 
@@ -119,23 +127,23 @@ function punchBlockDown()
 	if(tY+1 < mapH and map[tY+1][tX] > 0) then
 		local cnt = mapH-tY+1
 		for px = 0, cnt do
-			local firstBlock = getBlockAtTilePos(tX, tY+1+px)
+			local firstBlock = getBlockAtTilePos(tX, tY+px+1)
 			if firstBlock then
-				firstBlock.y = firstBlock.y - firstBlock.height
-				map[tY+1+px][tX] = 0
+				startTween(firstBlock, firstBlock.x, firstBlock.y - firstBlock.height)
+				map[tY+px+1][tX] = 0
 				map[tY+px][tX] = firstBlock.mapId
+				firstBlock.mapX = tX
+				firstBlock.mapY = tY+px
 			end
 		end
 		local lastBlock = getBlockAtTilePos(tX, tY)
-		lastBlock.y = love.window.getHeight() - lastBlock.height
+		startTween(lastBlock, lastBlock.x, love.window.getHeight() - lastBlock.height)
 		map[tY][tX] = 0
 		map[mapH][tX] = lastBlock.mapId
+		lastBlock.mapX = tX
+		lastBlock.mapY = mapH
 
-		for y = 1, mapH do
-			print(map[y][1].." "..map[y][2].." "..map[y][3].." "..map[y][4].." "..map[y][5].." "..map[y][6].." "..map[y][7].." "..map[y][8].." "..map[y][9].." "..map[y][10])
-		end
-		print("=====================================")
-		checkForDownMatches(tX, tY+1)
+		--checkForDownMatches(tX, tY+1)
 	end
 end
 
