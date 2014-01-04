@@ -19,8 +19,8 @@ function love.update(dt)
 	elapsedTime = elapsedTime + dt;
 	if growBuffer > growTime then
 		growBuffer = 0;
-		--liftHero();
-		--addRowOfBlocks();
+		liftHero();
+		addRowOfBlocks();
 	else
 		growBuffer = growBuffer + dt;
 	end
@@ -43,6 +43,8 @@ function love.keypressed(key, isRepeat)
 		punchBlockRight()
 	elseif key == " " and hero.direction == -1 then
 		punchBlockLeft()
+	elseif key == "up" then
+		heroJump()
 	end
 end
 

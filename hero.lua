@@ -10,7 +10,8 @@ function initHero()
 	hero.width = 20
 	hero.height = 20 
 	hero.speed = 150
-	hero.gravity = 59.8
+	hero.jumpSpeed = 40
+	hero.gravity = 99.8
 	hero.direction = 0
 end
 
@@ -40,12 +41,13 @@ function handleInput(dt)
 		moveHero(hero.speed*dt, 0)
 		hero.direction = 1
 	end
-	if love.keyboard.isDown("up")  then
-		moveHero(0, -hero.speed*dt)
-	end
 	if love.keyboard.isDown("down") then
 		hero.direction = 0
 	end
+end
+
+function heroJump()
+	moveHero(0, -hero.jumpSpeed)
 end
 
 function moveHero(dx, dy)
