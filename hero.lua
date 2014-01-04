@@ -92,7 +92,10 @@ function punchBlockRight()
 		map[tY][mapW] = lastBlock.mapId
 		lastBlock.mapX = mapW
 		lastBlock.mapY = tY
+
+		checkForMatches()
 	end
+	logBoard()
 end
 
 function punchBlockLeft()
@@ -117,7 +120,10 @@ function punchBlockLeft()
 		map[tY][1] = lastBlock.mapId
 		lastBlock.mapX = 1
 		lastBlock.mapY = tY
+
+		checkForMatches()
 	end
+	logBoard()
 end
 
 function punchBlockDown()
@@ -143,8 +149,9 @@ function punchBlockDown()
 		lastBlock.mapX = tX
 		lastBlock.mapY = mapH
 
-		--checkForDownMatches(tX, tY+1)
+		checkForMatches()
 	end
+	logBoard()
 end
 
 function getHeroTileX()

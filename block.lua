@@ -9,7 +9,7 @@ function initBlock(newX, newY, mapX, mapY)
 	block.state = "notTween"
 	getColor(love.math.random(4))
 	table.insert(blocks, block)
-	map[getBlockTileY(block)][getBlockTileX(block)] = block.mapId
+	map[block.mapY][block.mapX] = block.mapId
 	return block
 end
 
@@ -47,7 +47,7 @@ function startTween(block, tx, ty)
 end
 
 function isNear(pos1, pos2)
-	return pos1-20.0 < pos2 and pos1+20.0 > pos2
+	return pos1-50.0 < pos2 and pos1+50.0 > pos2
 end
 
 function updateBlock(block, dt)
@@ -59,19 +59,22 @@ function updateBlock(block, dt)
 			block.x = tween(elapsedTime, block.x, block.tweenX - block.startX, 100)
 			else
 			block.x = block.tweenX
+			block.mapX = getBlockTileX(block)
 			end
 			if not isNear(block.y, block.tweenY) then
 			block.y = tween(elapsedTime, block.y, block.tweenY - block.startY, 100)
 			else
 			block.y = block.tweenY
+			block.mapY = getBlockTileY(block)
 			end
 		end	
 	else
-		local bx = getBlockTileX(block)
-		local by = getBlockTileY(block)
+		local bx = block.mapX
+		local by = block.mapY
 		if by+1 <= mapH then
 		if not getBlockAtTilePos(bx, by+1) then
 			block.y = block.y + block.height
+			block.mapY = by + 1
 			map[by][bx] = 0
 			map[by+1][bx] = block.mapId
 		end
@@ -107,11 +110,10 @@ function getBlockAtTilePos(tX, tY)
 end
 
 function removeBlock(temp)
+	logBoard()
 	for i, block in ipairs(blocks) do
-		if(block.x == temp.x and block.y == temp.y) then
-			local bx = getBlockTileX(block)
-			local by = getBlockTileY(block)
-			map[by][bx] = 0
+		if(block.mapX == temp.mapX and block.mapY == temp.mapY) then
+			map[block.mapY][block.mapX] = 0
 			table.remove(blocks, i)
 		end
 	end

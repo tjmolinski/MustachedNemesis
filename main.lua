@@ -19,8 +19,8 @@ function love.update(dt)
 	elapsedTime = elapsedTime + dt;
 	if growBuffer > growTime then
 		growBuffer = 0;
-		liftHero();
-		addRowOfBlocks();
+		--liftHero();
+		--addRowOfBlocks();
 	else
 		growBuffer = growBuffer + dt;
 	end
