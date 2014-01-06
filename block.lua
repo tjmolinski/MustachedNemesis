@@ -47,7 +47,7 @@ function startTween(block, tx, ty)
 end
 
 function isNear(pos1, pos2)
-	return pos1-50.0 < pos2 and pos1+50.0 > pos2
+	return true--pos1-50.0 < pos2 and pos1+50.0 > pos2
 end
 
 function updateBlock(block, dt)
@@ -77,6 +77,7 @@ function updateBlock(block, dt)
 			block.mapY = by + 1
 			map[by][bx] = 0
 			map[by+1][bx] = block.mapId
+			checkForMatches()
 		end
 		end
 	end

@@ -13,14 +13,16 @@ function love.load(args)
 	love.window.setMode(400, 500, {} )
 	initHero()
 	initPuzzleBoard()
+	checkForMatches()
 end
 
 function love.update(dt)
 	elapsedTime = elapsedTime + dt;
 	if growBuffer > growTime then
 		growBuffer = 0;
-		liftHero();
-		addRowOfBlocks();
+		liftHero()
+		addRowOfBlocks()
+		checkForMatches()
 	else
 		growBuffer = growBuffer + dt;
 	end

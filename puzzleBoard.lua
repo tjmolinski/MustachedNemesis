@@ -52,7 +52,7 @@ function checkForMatches()
 		for x=1, mapW do
 			if map[y][x] > 0 then
 				checkForVerticalMatches(x, y)
-				--checkForHorizontalMatches(x, y)
+				checkForHorizontalMatches(x, y)
 			end
 		end
 	end

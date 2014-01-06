@@ -7,12 +7,17 @@ hero = {}
 function initHero()
 	hero.x = 200
 	hero.y = 250
+	hero.vx = 0
+	hero.vy = 0
 	hero.width = 20
 	hero.height = 20 
-	hero.speed = 150
-	hero.jumpSpeed = 40
-	hero.gravity = 99.8
+	hero.speed = 700
+	hero.jumpSpeed = 300
+	hero.friction = 0.98
+	hero.airFriction = 0.975
+	hero.gravity = 280
 	hero.direction = 0
+	hero.jumping = false
 end
 
 function liftHero()
@@ -25,20 +30,35 @@ function updateHero(dt)
 end
 
 function handlePhysics(dt)
+	moveHero(hero.vx * dt, hero.vy * dt)
+
+	hero.vx = hero.vx * hero.friction
+
+	if hero.jumping then
+		hero.vy = hero.vy * hero.airFriction
+		if hero.vy >= -5.0 then
+			hero.jumping = false
+		end
+	else
+		hero.vy = hero.vy + (hero.gravity * dt)
+	end
+
 	if(hero.y >= love.window.getHeight() - hero.height) then
 		hero.y = love.window.getHeight() - hero.height
-	else
-		hero.y = hero.y + hero.gravity * dt
+		hero.vx = 0
+		hero.jumping = false
 	end
 end
 
 function handleInput(dt)
 	if love.keyboard.isDown("left") then
-		moveHero(-hero.speed*dt, 0)
+		--moveHero(-hero.speed*dt, 0)
+		hero.vx = hero.vx - (hero.speed * dt)
 		hero.direction = -1
 	end
 	if love.keyboard.isDown("right") then
-		moveHero(hero.speed*dt, 0)
+		--moveHero(hero.speed*dt, 0)
+		hero.vx = hero.vx + (hero.speed * dt)
 		hero.direction = 1
 	end
 	if love.keyboard.isDown("down") then
@@ -47,7 +67,10 @@ function handleInput(dt)
 end
 
 function heroJump()
-	moveHero(0, -hero.jumpSpeed)
+	if not hero.jumping then
+		hero.jumping = true
+		hero.vy = -hero.jumpSpeed
+	end
 end
 
 function moveHero(dx, dy)
@@ -65,10 +88,13 @@ end
 function heroHitBlock(block)
 	if(block.y > hero.y) then
 		hero.y = block.y - hero.height
+		hero.vy = 0
 	elseif(block.x < hero.x) then
 		hero.x = block.x + block.width
+		hero.vx = 0
 	elseif(block.x > hero.x) then
 		hero.x = block.x - hero.width
+		hero.vx = 0
 	end
 end
 
