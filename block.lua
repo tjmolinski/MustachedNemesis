@@ -13,29 +13,8 @@ function initBlock(newX, newY, mapX, mapY)
 	return block
 end
 
-function getColor(type)
-	block.mapId = type
-	if type == 0 then
-		block.cr = 255
-		block.cg = 0
-		block.cb = 0
-	elseif type == 1 then
-		block.cr = 0
-		block.cg = 255
-		block.cb = 0
-	elseif type == 2 then
-		block.cr = 0
-		block.cg = 0
-		block.cb = 255
-	elseif type == 3 then
-		block.cr = 255
-		block.cg = 0
-		block.cb = 255
-	else
-		block.cr = 0
-		block.cg = 255
-		block.cb = 255
-	end
+function getColor(id)
+	block.mapId = id
 end
 
 function startTween(block, tx, ty)
@@ -94,12 +73,18 @@ function drawBlocks()
 end
 
 function drawBlock(block)
-	local pr, pg, pb, pa = love.graphics.getColor()
-	love.graphics.setColor(0,0,0)
-	love.graphics.rectangle("line", block.x, block.y, block.width, block.height)
-	love.graphics.setColor(block.cr, block.cg, block.cb)
-	love.graphics.rectangle("fill", block.x, block.y, block.width, block.height)
-	love.graphics.setColor(pr, pg, pb, pa)
+	if block.mapId == 0 then
+		love.graphics.draw(blueBlock, block.x, block.y)
+	elseif block.mapId == 1 then
+		love.graphics.draw(greenBlock, block.x, block.y)
+
+	elseif block.mapId == 2 then
+		love.graphics.draw(purpleBlock, block.x, block.y)
+	elseif block.mapId == 3 then
+		love.graphics.draw(redBlock, block.x, block.y)
+	else
+		love.graphics.draw(yellowBlock, block.x, block.y)
+	end
 end
 
 function getBlockAtTilePos(tX, tY)

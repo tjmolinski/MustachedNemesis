@@ -6,6 +6,11 @@ require 'boundingBox'
 
 elapsedTime = 0;
 blocks = {}
+purpleBlock = love.graphics.newImage("block_purple.png")
+redBlock = love.graphics.newImage("block_red.png")
+yellowBlock = love.graphics.newImage("block_yellow.png")
+blueBlock = love.graphics.newImage("block_blue.png")
+greenBlock = love.graphics.newImage("block_green.png")
 local growBuffer = 0;
 local growTime = 5;
 
