@@ -7,18 +7,18 @@ tile = {}
 function initPuzzleBoard()
 	map = {
 	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,1,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,1,0,0,0,0,0,1,0},
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,1,0},
+	{0,0,0,0,0,0,1,0,0,0},
+	{1,0,0,0,0,0,0,0,0,0},
+	{0,0,1,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,1,0,0,0,0,0},
-	{0,0,1,0,1,0,0,0,0,0},
-	{1,1,1,1,1,1,0,0,0,0},
-	{1,1,1,1,1,1,1,0,1,1},
+	{1,0,1,0,1,0,1,0,1,0},
 	}
 
 	mapW = #map[1]
@@ -35,27 +35,38 @@ function initPuzzleBoard()
 end
 
 function createBlocks()
-	offsetX = -20--mapX % tileW
-	offsetY = 0--mapY % tileH
+	offsetX = -20
+	offsetY = 0
 
 	for y=1, mapH do
 		for x=1, mapW do
 			if map[y][x] == 1 then
-				initBlock(((x-1)*tileW) - offsetX - tileW/2, ((y-1)*tileH) - offsetY - tileH/2, x, y)
+				initBlock(((x-1)*tileW) - offsetX - (tileW/2), ((y-1)*tileH) - offsetY - tileH/2, x, y)
 			end
 		end
 	end
 end
 
 function checkForMatches()
-	for y=1, mapH do
-		for x=1, mapW do
-			if map[y][x] > 0 then
-				checkForVerticalMatches(x, y)
-				checkForHorizontalMatches(x, y)
+	if not dirtyBlocks() then
+		for y=1, mapH do
+			for x=1, mapW do
+				if map[y][x] > 0 then
+					checkForVerticalMatches(x, y)
+					checkForHorizontalMatches(x, y)
+				end
 			end
 		end
 	end
+end
+
+function dirtyBlocks()
+	for i, block in ipairs(blocks) do
+		if block.dirty then
+			return false
+		end
+	end
+	return true
 end
 
 function checkForHorizontalMatches(x, y)
@@ -100,7 +111,7 @@ function checkForVerticalMatches(x, y)
 			if color == map[ty][tx] and color > 0 then
 				table.insert(tempMatches, tx)
 				table.insert(tempMatches, ty)
-				print("find:"..tx.." "..ty)
+				--print("find:"..tx.." "..ty)
 			else
 				break
 			end
@@ -109,7 +120,7 @@ function checkForVerticalMatches(x, y)
 			if color == map[y-ty][tx] and color > 0 then
 				table.insert(tempMatches, tx)
 				table.insert(tempMatches, y-ty)
-				print("find:"..tx.." "..y-ty)
+				--print("find:"..tx.." "..y-ty)
 			else
 				break
 			end
@@ -133,7 +144,8 @@ function addRowOfBlocks()
 		for x=1, mapW do
 			local block = getBlockAtTilePos(x, y);
 			if block then
-				startTween(block, block.x, block.y - block.height)
+				--startTween(block, block.x, block.y - block.height)
+				block.y = block.y - block.height
 				map[y][x] = 0;	
 				map[y-1][x] = block.mapId;	
 				block.mapX = x
@@ -142,9 +154,8 @@ function addRowOfBlocks()
 		end
 	end
 	for x=1, mapW do
-		initBlock(((x-1)*tileW) - offsetX - tileW/2, ((mapH-1)*tileH) - offsetY - tileH/2, x, mapH)
+		initBlock(((x-1)*tileW) - offsetX - (tileW/2), ((mapH-1)*tileH) - offsetY - (tileH/2), x, mapH)
 	end
-	logBoard()
 end
 
 function logBoard()

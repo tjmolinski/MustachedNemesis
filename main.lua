@@ -18,7 +18,6 @@ function love.load(args)
 	love.window.setMode(400, 500, {} )
 	initHero()
 	initPuzzleBoard()
-	checkForMatches()
 end
 
 function love.update(dt)
@@ -44,12 +43,8 @@ function love.draw()
 end
 
 function love.keypressed(key, isRepeat)
-	if key == " " and hero.direction == 0  then
-		punchBlockDown()
-	elseif key == " " and hero.direction == 1 then
-		punchBlockRight()
-	elseif key == " " and hero.direction == -1 then
-		punchBlockLeft()
+	if key == " " then
+		heroAction()
 	elseif key == "up" then
 		heroJump()
 	end

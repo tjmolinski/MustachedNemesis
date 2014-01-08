@@ -18,6 +18,9 @@ function initHero()
 	hero.gravity = 280
 	hero.direction = 0
 	hero.jumping = false
+	hero.onGround = false
+	hero.state = "idle"
+	hero.heldObject = nil
 end
 
 function liftHero()
@@ -39,25 +42,26 @@ function handlePhysics(dt)
 		if hero.vy >= -5.0 then
 			hero.jumping = false
 		end
-	else
+	elseif not hero.onGround then
 		hero.vy = hero.vy + (hero.gravity * dt)
 	end
 
-	if(hero.y >= love.window.getHeight() - hero.height) then
+	if hero.y >= love.window.getHeight() - hero.height then
 		hero.y = love.window.getHeight() - hero.height
-		hero.vx = 0
+		if not hero.onGround then
+			hero.vx = 0
+		end
 		hero.jumping = false
+		hero.onGround = true
 	end
 end
 
 function handleInput(dt)
 	if love.keyboard.isDown("left") then
-		--moveHero(-hero.speed*dt, 0)
 		hero.vx = hero.vx - (hero.speed * dt)
 		hero.direction = -1
 	end
 	if love.keyboard.isDown("right") then
-		--moveHero(hero.speed*dt, 0)
 		hero.vx = hero.vx + (hero.speed * dt)
 		hero.direction = 1
 	end
@@ -69,6 +73,7 @@ end
 function heroJump()
 	if not hero.jumping then
 		hero.jumping = true
+		hero.onGround = false
 		hero.vy = -hero.jumpSpeed
 	end
 end
@@ -86,7 +91,9 @@ function drawHero()
 end
 
 function heroHitBlock(block)
-	if(block.y > hero.y) then
+	if block.state == "lifted" then
+		--DO BETTER
+	elseif(block.y > hero.y) then
 		hero.y = block.y - hero.height
 		hero.vy = 0
 	elseif(block.x < hero.x) then
@@ -98,88 +105,36 @@ function heroHitBlock(block)
 	end
 end
 
-function punchBlockRight()
-	local tX = getHeroTileX()
-	local tY = getHeroTileY()
-
-	if(tX+1 < mapW and map[tY][tX+1] > 0) then
-		local cnt = mapW-tX+1
-		for px = 0, cnt do
-			local firstBlock = getBlockAtTilePos(tX+1+px, tY)
-			if firstBlock then
-				startTween(firstBlock, firstBlock.x - firstBlock.width, firstBlock.y)
-				map[tY][tX+1+px] = 0
-				map[tY][tX+px] = firstBlock.mapId
-				firstBlock.mapX = tX+px
-				firstBlock.mapY = tY
-			end
+function heroAction()
+	if hero.state == "idle" then
+		if hero.direction == 0 then --lift block below
+			liftBelow()
+		elseif hero.direction == 1 then --lift block right
+		elseif hero.direction == -1 then --lift block left
 		end
-		local lastBlock = getBlockAtTilePos(tX, tY)
-		startTween(lastBlock, love.window.getWidth() - lastBlock.width, lastBlock.y)
-		map[tY][tX] = 0
-		map[tY][mapW] = lastBlock.mapId
-		lastBlock.mapX = mapW
-		lastBlock.mapY = tY
-
-		checkForMatches()
+	elseif hero.state == "holding" then
+		if hero.direction == 0 then --drop block below
+			dropBelow()
+		elseif hero.direction == 1 then --drop block right
+		elseif hero.direction == -1 then --drop block left
+		end
 	end
-	logBoard()
 end
 
-function punchBlockLeft()
-	local tX = getHeroTileX()
-	local tY = getHeroTileY()
-
-	if(tX-1 > 0 and map[tY][tX-1] > 0) then
-		local cnt = tX-1
-		for px = 0, cnt do
-			local firstBlock = getBlockAtTilePos(tX-1-px, tY)
-			if firstBlock then
-				startTween(firstBlock, firstBlock.x + firstBlock.width, firstBlock.y)
-				map[tY][tX-1-px] = 0
-				map[tY][tX-px] = firstBlock.mapId
-				firstBlock.mapX = tX-px
-				firstBlock.mapY = tY
-			end
-		end
-		local lastBlock = getBlockAtTilePos(tX, tY)
-		startTween(lastBlock, 0, lastBlock.y)
-		map[tY][tX] = 0
-		map[tY][1] = lastBlock.mapId
-		lastBlock.mapX = 1
-		lastBlock.mapY = tY
-
-		checkForMatches()
+function dropBelow()
+	if hero.heldObject then
+		dropBlock(hero.heldObject)
+		hero.state = "idle"
 	end
-	logBoard()
 end
 
-function punchBlockDown()
-	local tX = getHeroTileX()
-	local tY = getHeroTileY()
-
-	if(tY+1 < mapH and map[tY+1][tX] > 0) then
-		local cnt = mapH-tY+1
-		for px = 0, cnt do
-			local firstBlock = getBlockAtTilePos(tX, tY+px+1)
-			if firstBlock then
-				startTween(firstBlock, firstBlock.x, firstBlock.y - firstBlock.height)
-				map[tY+px+1][tX] = 0
-				map[tY+px][tX] = firstBlock.mapId
-				firstBlock.mapX = tX
-				firstBlock.mapY = tY+px
-			end
-		end
-		local lastBlock = getBlockAtTilePos(tX, tY)
-		startTween(lastBlock, lastBlock.x, love.window.getHeight() - lastBlock.height)
-		map[tY][tX] = 0
-		map[mapH][tX] = lastBlock.mapId
-		lastBlock.mapX = tX
-		lastBlock.mapY = mapH
-
-		checkForMatches()
+function liftBelow()
+	local _block = getBlockAtTilePos(getHeroTileX(), getHeroTileY()+1)
+	if _block then
+		hero.heldObject = _block
+		liftBlock(_block)
+		hero.state = "holding"
 	end
-	logBoard()
 end
 
 function getHeroTileX()
