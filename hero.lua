@@ -108,15 +108,19 @@ end
 function heroAction()
 	if hero.state == "idle" then
 		if hero.direction == 0 then --lift block below
-			liftBelow()
+			grabBelow()
 		elseif hero.direction == 1 then --lift block right
+			grabRight()
 		elseif hero.direction == -1 then --lift block left
+			grabLeft()
 		end
 	elseif hero.state == "holding" then
 		if hero.direction == 0 then --drop block below
 			dropBelow()
 		elseif hero.direction == 1 then --drop block right
+			dropRight()
 		elseif hero.direction == -1 then --drop block left
+			dropLeft()
 		end
 	end
 end
@@ -128,8 +132,42 @@ function dropBelow()
 	end
 end
 
-function liftBelow()
+function dropRight()
+	local _block = getBlockAtTilePos(getHeroTileX()+1, getHeroTileY())
+	if (not _block) and hero.heldObject then
+		dropBlockRight(hero.heldObject)
+		hero.state = "idle"
+	end
+end
+
+function dropLeft()
+	local _block = getBlockAtTilePos(getHeroTileX()-1, getHeroTileY())
+	if (not _block) and hero.heldObject then
+		dropBlockLeft(hero.heldObject)
+		hero.state = "idle"
+	end
+end
+
+function grabBelow()
 	local _block = getBlockAtTilePos(getHeroTileX(), getHeroTileY()+1)
+	if _block then
+		hero.heldObject = _block
+		liftBlock(_block)
+		hero.state = "holding"
+	end
+end
+
+function grabLeft()
+	local _block = getBlockAtTilePos(getHeroTileX()-1, getHeroTileY())
+	if _block then
+		hero.heldObject = _block
+		liftBlock(_block)
+		hero.state = "holding"
+	end
+end
+
+function grabRight()
+	local _block = getBlockAtTilePos(getHeroTileX()+1, getHeroTileY())
 	if _block then
 		hero.heldObject = _block
 		liftBlock(_block)

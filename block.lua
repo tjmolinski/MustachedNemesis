@@ -5,7 +5,7 @@ function initBlock(newX, newY, mapX, mapY)
 	block = {}
 	block.width = 40
 	block.height = 40
-	block.fallSpeed = 50
+	block.fallSpeed = 600
 	block.x = newX
 	block.y = newY
 	block.mapX = mapX
@@ -140,6 +140,27 @@ function dropBlock(block)
 	block.dirty = true
 	map[block.mapY][block.mapX] = block.mapId
 	hero.y = hero.y - block.height
+end
+
+function dropBlockLeft(block)
+	block.state = "idle"
+	block.x = (getBlockTileX(hero)-2) * tileW
+	block.y = hero.y - hero.height
+	block.mapX = getBlockTileX(hero) - 1
+	block.mapY = getBlockTileY(hero)
+	block.dirty = true
+	map[block.mapY][block.mapX] = block.mapId
+end
+
+function dropBlockRight(block)
+	block.state = "idle"
+	block.x = (getBlockTileX(hero)) * tileW
+	block.y = hero.y - hero.height
+	block.mapX = getBlockTileX(hero) - 1
+	block.mapX = getBlockTileX(hero) + 1
+	block.mapY = getBlockTileY(hero)
+	block.dirty = true
+	map[block.mapY][block.mapX] = block.mapId
 end
 
 function removeBlock(temp)
