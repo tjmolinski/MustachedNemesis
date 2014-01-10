@@ -45,6 +45,7 @@ end
 function love.keypressed(key, isRepeat)
 	if key == " " then
 		heroAction()
+		checkForMatches()
 	elseif key == "up" then
 		heroJump()
 	end

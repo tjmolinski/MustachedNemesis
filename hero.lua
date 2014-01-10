@@ -54,6 +54,14 @@ function handlePhysics(dt)
 		hero.jumping = false
 		hero.onGround = true
 	end
+	if hero.x <= 0 then
+		hero.x = 0
+		hero.vx = 0
+	end
+	if hero.x >= love.window.getWidth() - hero.width then
+		hero.x = love.window.getWidth() - hero.width
+		hero.vx = 0
+	end
 end
 
 function handleInput(dt)
@@ -134,7 +142,7 @@ end
 
 function dropRight()
 	local _block = getBlockAtTilePos(getHeroTileX()+1, getHeroTileY())
-	if (not _block) and hero.heldObject then
+	if (not _block) and hero.heldObject and getHeroTileX() + 1 <= mapW then
 		dropBlockRight(hero.heldObject)
 		hero.state = "idle"
 	end
@@ -142,7 +150,7 @@ end
 
 function dropLeft()
 	local _block = getBlockAtTilePos(getHeroTileX()-1, getHeroTileY())
-	if (not _block) and hero.heldObject then
+	if (not _block) and hero.heldObject and getHeroTileX() - 1 > 0 then
 		dropBlockLeft(hero.heldObject)
 		hero.state = "idle"
 	end

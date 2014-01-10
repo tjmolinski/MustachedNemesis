@@ -70,10 +70,11 @@ function falling(block, dt)
 	else
 		for i, _block in ipairs(blocks) do
 			if not (block.mapX == _block.mapX and block.mapY == _block.mapY) then
-				if checkCollision(block.x, block.y, block.width, block.height, _block.x, _block.y, _block.width, _block.height) then
-					print("hit block")
+				if checkCollision(block.x, block.y, block.width, block.height, _block.x, _block.y, _block.width, _block.height) and _block.state == "idle" then
 					block.state = "idle"
+					block.dirty = false
 					block.y = _block.y - block.height
+					block.mapX = _block.mapX
 					block.mapY = _block.mapY - 1
 					map[block.mapY][block.mapX] = block.mapId
 					checkForMatches()
@@ -129,6 +130,8 @@ end
 function liftBlock(block)
 	block.state = "lifted"
 	map[block.mapY][block.mapX] = 0
+	block.mapY = 0
+	block.mapX = 0
 end
 
 function dropBlock(block)
