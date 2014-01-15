@@ -3,6 +3,7 @@ require 'block'
 require 'boundingBox'
 
 tile = {}
+matches = {}
 
 function initPuzzleBoard()
 	map = {
@@ -34,6 +35,29 @@ function initPuzzleBoard()
 	createBlocks()
 end
 
+function floodFill(x, y, oldColor)
+	if map[y][x] == oldColor then
+		local _block = getBlockAtTilePos(x, y)
+		if not _block.checked then
+			table.insert(matches, _block)
+			_block.checked = true
+
+			if (x+1) <= mapW then
+				floodFill(x+1, y, oldColor) --Check to the right
+			end
+			if (x-1) > 0 then
+				floodFill(x-1, y, oldColor) --Check to the left
+			end
+			if (y+1) <= mapH then
+				floodFill(x, y+1, oldColor) --Check the bottom
+			end
+			if (y-1) > 0 then
+				floodFill(x, y-1, oldColor) --Check the top
+			end
+		end
+	end
+end
+
 function createBlocks()
 	offsetX = -20
 	offsetY = 0
@@ -52,8 +76,16 @@ function checkForMatches()
 		for y=1, mapH do
 			for x=1, mapW do
 				if map[y][x] > 0 then
-					checkForVerticalMatches(x, y)
-					checkForHorizontalMatches(x, y)
+					floodFill(x, y, map[y][x])
+					if size(matches) > 2 then
+						for k in pairs(matches) do
+							matches[k].state = "matched"
+						end	
+					end
+					for i in pairs(matches) do
+						matches[i].checked = false
+					end
+					matches = {}
 				end
 			end
 		end
@@ -67,74 +99,6 @@ function dirtyBlocks()
 		end
 	end
 	return true
-end
-
-function checkForHorizontalMatches(x, y)
-	local matches = {}
-	for ty=y, mapH do
-		local color = map[ty][x]
-		local tempMatches = {}
-		for tx=x+1, mapW do
-			if color == map[ty][tx] and color > 0 then
-				table.insert(tempMatches, tx)
-				table.insert(tempMatches, ty)
-			else
-				break
-			end
-		end
-		for tx=0, x do
-			if color == map[ty][x-tx] and color > 0 then
-				table.insert(tempMatches, x-tx)
-				table.insert(tempMatches, ty)
-			else
-				break
-			end
-		end
-		if size(tempMatches) > 5 then
-			for idx=1, size(tempMatches) do
-				if idx % 2 > 0 then
-					local tempBlock = getBlockAtTilePos(tempMatches[idx],tempMatches[idx+1])
-					--print("pair :"..math.floor((tempMatches[idx]))..":"..(tempMatches[idx+1]))
-					removeBlock(tempBlock) 
-				end
-			end
-		end
-	end
-end
-
-function checkForVerticalMatches(x, y)
-	local matches = {}
-	for tx=x, mapW do
-		local color = map[y][tx]
-		local tempMatches = {}
-		for ty=y+1, mapH do
-			if color == map[ty][tx] and color > 0 then
-				table.insert(tempMatches, tx)
-				table.insert(tempMatches, ty)
-				--print("find:"..tx.." "..ty)
-			else
-				break
-			end
-		end
-		for ty=0, y do
-			if color == map[y-ty][tx] and color > 0 then
-				table.insert(tempMatches, tx)
-				table.insert(tempMatches, y-ty)
-				--print("find:"..tx.." "..y-ty)
-			else
-				break
-			end
-		end
-		if size(tempMatches) > 5 then
-			for idx=1, size(tempMatches) do
-				if idx % 2 > 0 then
-					local tempBlock = getBlockAtTilePos(tempMatches[idx],tempMatches[idx+1])
-					--print("pair :"..math.floor((tempMatches[idx]))..":"..(tempMatches[idx+1]))
-					removeBlock(tempBlock) 
-				end
-			end
-		end
-	end
 end
 
 function addRowOfBlocks()

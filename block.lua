@@ -37,6 +37,8 @@ end
 function updateBlock(block, dt)
 	if block.state == "falling" then
 		falling(block, dt)
+	elseif block.state == "matched" then
+		removeBlock(block)
 	elseif block.state == "idle" then
 		idle(block)
 	elseif block.state == "lifted" then
