@@ -13,14 +13,16 @@ function initHero()
 	hero.height = 20 
 	hero.speed = 700
 	hero.jumpSpeed = 300
-	hero.friction = 0.98
-	hero.airFriction = 0.975
+	hero.friction = 0.1
+	hero.airFriction = 0.1
 	hero.gravity = 280
 	hero.direction = 0
 	hero.jumping = false
 	hero.onGround = false
 	hero.state = "idle"
 	hero.heldObject = nil
+	hero.slamSpeed = 200000
+	hero.slamming = false
 end
 
 function liftHero()
@@ -28,17 +30,38 @@ function liftHero()
 end
 
 function updateHero(dt)
-	handleInput(dt)
-	handlePhysics(dt)
+	if hero.slamming then
+		handleSlam(dt)
+	else
+		handleInput(dt)
+		handlePhysics(dt)
+	end
+end
+
+function handleSlam(dt)
+	hero.vx = 0
+	hero.vy = hero.slamSpeed * dt
+
+	if hero.y >= love.window.getHeight() - hero.height then
+		hero.y = love.window.getHeight() - hero.height
+		hero.jumping = false
+		hero.onGround = true
+	end
+	
+	if hero.onGround then
+		hero.slamming = false
+	end
+
+	moveHero(hero.vx * dt, hero.vy * dt)
 end
 
 function handlePhysics(dt)
 	moveHero(hero.vx * dt, hero.vy * dt)
 
-	hero.vx = hero.vx * hero.friction
+	hero.vx = hero.vx * math.pow(hero.friction, dt)
 
 	if hero.jumping then
-		hero.vy = hero.vy * hero.airFriction
+		hero.vy = hero.vy * math.pow(hero.airFriction, dt)
 		if hero.vy >= -5.0 then
 			hero.jumping = false
 		end
@@ -75,6 +98,9 @@ function handleInput(dt)
 	end
 	if love.keyboard.isDown("down") then
 		hero.direction = 0
+		if not hero.onGround then
+			--hero.slamming = true
+		end
 	end
 end
 
@@ -99,6 +125,7 @@ function drawHero()
 end
 
 function heroHitBlock(block)
+	hero.slamming = false
 	if block.state == "lifted" then
 		--DO BETTER
 	elseif(block.y > hero.y) then

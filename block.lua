@@ -137,7 +137,7 @@ function liftBlock(block)
 end
 
 function dropBlock(block)
-	block.state = "idle"
+	block.state = "falling"
 	block.x = (getBlockTileX(hero)-1) * tileW
 	block.y = hero.y - hero.height
 	block.mapX = getBlockTileX(hero)
@@ -148,7 +148,7 @@ function dropBlock(block)
 end
 
 function dropBlockLeft(block)
-	block.state = "idle"
+	block.state = "falling"
 	block.x = (getBlockTileX(hero)-2) * tileW
 	block.y = hero.y - hero.height
 	block.mapX = getBlockTileX(hero) - 1
@@ -158,7 +158,7 @@ function dropBlockLeft(block)
 end
 
 function dropBlockRight(block)
-	block.state = "idle"
+	block.state = "falling"
 	block.x = (getBlockTileX(hero)) * tileW
 	block.y = hero.y - hero.height
 	block.mapX = getBlockTileX(hero) - 1

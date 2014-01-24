@@ -70,13 +70,82 @@ function createBlocks()
 		end
 	end
 end
+function checkForHorizontalMatches(x, y)
+        for ty=y, mapH do
+                local color = map[ty][x]
+                local tempMatches = {}
+                for tx=x+1, mapW do
+                        if color == map[ty][tx] and color > 0 then
+                                table.insert(tempMatches, tx)
+                                table.insert(tempMatches, ty)
+                        else
+                                break
+                        end
+                end
+                for tx=0, x do
+                        if color == map[ty][x-tx] and color > 0 then
+                                table.insert(tempMatches, x-tx)
+                                table.insert(tempMatches, ty)
+                        else
+                                break
+                        end
+                end
+                if size(tempMatches) > 5 then
+                        for idx=1, size(tempMatches) do
+                                if idx % 2 > 0 then
+                                        local _block = getBlockAtTilePos(tempMatches[idx],tempMatches[idx+1])
+                                        --print("pair :"..math.floor((tempMatches[idx]))..":"..(tempMatches[idx+1]))
+                                        --removeBlock(tempBlock)
+					table.insert(matches, _block)
+                                end
+                        end
+                end
+        end
+end
+
+function checkForVerticalMatches(x, y)
+        for tx=x, mapW do
+                local color = map[y][tx]
+                local tempMatches = {}
+                for ty=y+1, mapH do
+                        if color == map[ty][tx] and color > 0 then
+                                table.insert(tempMatches, tx)
+                                table.insert(tempMatches, ty)
+                                --print("find:"..tx.." "..ty)
+                        else
+                                break
+                        end
+                end
+                for ty=0, y do
+                        if color == map[y-ty][tx] and color > 0 then
+                                table.insert(tempMatches, tx)
+                                table.insert(tempMatches, y-ty)
+                                --print("find:"..tx.." "..y-ty)
+                        else
+                                break
+                        end
+                end
+                if size(tempMatches) > 5 then
+                        for idx=1, size(tempMatches) do
+                                if idx % 2 > 0 then
+                                        local _block = getBlockAtTilePos(tempMatches[idx],tempMatches[idx+1])
+                                        --print("pair :"..math.floor((tempMatches[idx]))..":"..(tempMatches[idx+1]))
+                                        --removeBlock(tempBlock)
+					table.insert(matches, _block)
+                                end
+                        end
+                end
+        end
+end
 
 function checkForMatches()
 	if not dirtyBlocks() then
 		for y=1, mapH do
 			for x=1, mapW do
 				if map[y][x] > 0 then
-					floodFill(x, y, map[y][x])
+					--floodFill(x, y, map[y][x])
+					checkForHorizontalMatches(x, y)
+					checkForVerticalMatches(x, y)
 					if size(matches) > 2 then
 						for k in pairs(matches) do
 							matches[k].state = "matched"
