@@ -40,11 +40,11 @@ function updateBlock(block, dt)
 	elseif block.state == "matched" then
 		removeBlock(block)
 	elseif block.state == "idle" then
+		checkForMatches()
 		idle(block)
 	elseif block.state == "lifted" then
 		followAbove(block, hero)
 	end
-	--logBoard()
 end
 
 function idle(block)

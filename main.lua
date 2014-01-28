@@ -26,7 +26,6 @@ function love.update(dt)
 		growBuffer = 0;
 		liftHero()
 		addRowOfBlocks()
-		checkForMatches()
 	else
 		growBuffer = growBuffer + dt;
 	end
@@ -45,7 +44,6 @@ end
 function love.keypressed(key, isRepeat)
 	if key == " " then
 		heroAction()
-		checkForMatches()
 	elseif key == "up" then
 		heroJump()
 	end

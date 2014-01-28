@@ -8,18 +8,18 @@ matches = {}
 function initPuzzleBoard()
 	map = {
 	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,1,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,1,0,0,0,0,0,1,0},
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,1,0},
-	{0,0,0,0,0,0,1,0,0,0},
-	{1,0,0,0,0,0,0,0,0,0},
-	{0,0,1,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0,0,0},
-	{1,0,1,0,1,0,1,0,1,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
 	}
 
 	mapW = #map[1]
@@ -71,6 +71,7 @@ function createBlocks()
 	end
 end
 function checkForHorizontalMatches(x, y)
+	local tempMatches = {}
         for ty=y, mapH do
                 local color = map[ty][x]
                 local tempMatches = {}
@@ -104,6 +105,7 @@ function checkForHorizontalMatches(x, y)
 end
 
 function checkForVerticalMatches(x, y)
+	local tempMatches = {}
         for tx=x, mapW do
                 local color = map[y][tx]
                 local tempMatches = {}
@@ -127,7 +129,7 @@ function checkForVerticalMatches(x, y)
                 end
                 if size(tempMatches) > 5 then
                         for idx=1, size(tempMatches) do
-                                if idx % 2 > 0 then
+                                if idx % 2 ~= 0 then
                                         local _block = getBlockAtTilePos(tempMatches[idx],tempMatches[idx+1])
                                         --print("pair :"..math.floor((tempMatches[idx]))..":"..(tempMatches[idx+1]))
                                         --removeBlock(tempBlock)
@@ -139,7 +141,8 @@ function checkForVerticalMatches(x, y)
 end
 
 function checkForMatches()
-	if not dirtyBlocks() then
+	if not fallingBlocks() then
+	--if dirtyBlocks() then
 		for y=1, mapH do
 			for x=1, mapW do
 				if map[y][x] > 0 then
@@ -158,16 +161,26 @@ function checkForMatches()
 				end
 			end
 		end
+	--end 
 	end
+end
+
+function fallingBlocks()
+	for i, block in ipairs(blocks) do
+		if block.state ~= "idle" and block.state ~= "lifted" then
+			return true 
+		end
+	end
+	return false
 end
 
 function dirtyBlocks()
 	for i, block in ipairs(blocks) do
 		if block.dirty then
-			return false
+			return true 
 		end
 	end
-	return true
+	return false
 end
 
 function addRowOfBlocks()
