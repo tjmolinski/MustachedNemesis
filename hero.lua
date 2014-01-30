@@ -122,6 +122,47 @@ function drawHero()
 	love.graphics.setColor(255, 0, 0)
 	love.graphics.rectangle("fill", hero.x, hero.y, hero.width, hero.height)
 	love.graphics.setColor(pr, pg, pb, pa)
+	drawHintReticule()
+end
+
+function drawHintReticule()
+	if hero.state == "holding" then
+		local myX = getHeroTileX()
+		local myY = getHeroTileY()
+		local _block = getClosestBlockBelow(myX+hero.direction, myY)
+		local posX
+		local posY
+
+		if _block then
+			posX = _block.x
+			posY = _block.y - _block.height
+		else
+			posX = (myX - 1 + hero.direction) * tileW
+			posY = love.window.getHeight() - block.height
+		end
+
+		if hero.heldObject.mapId == 0 then
+			love.graphics.draw(blueGhostBlock, posX, posY)
+		elseif hero.heldObject.mapId == 1 then
+			love.graphics.draw(greenGhostBlock, posX, posY)
+		elseif hero.heldObject.mapId == 2 then
+			love.graphics.draw(purpleGhostBlock, posX, posY) 
+		elseif hero.heldObject.mapId == 3 then
+			love.graphics.draw(redGhostBlock, posX, posY)
+		else
+			love.graphics.draw(yellowGhostBlock, posX, posY)
+		end
+	end
+end
+
+function getClosestBlockBelow(myX, myY)
+	local spaces = mapH - myY
+	for i=1, spaces do
+		local _block = getBlockAtTilePos(myX, myY+i)
+		if _block then 
+			return _block
+		 end
+	end	
 end
 
 function heroHitBlock(block)

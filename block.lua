@@ -121,14 +121,6 @@ function drawBlock(block)
 	end
 end
 
-function getBlockAtTilePos(tX, tY)
-	for i, block in ipairs(blocks) do
-		if(block.mapX == tX and block.mapY == tY) then
-			return block
-		end
-	end
-end
-
 function liftBlock(block)
 	block.state = "lifted"
 	map[block.mapY][block.mapX] = 0
@@ -184,4 +176,12 @@ end
 
 function getBlockTileY(block)
 	return math.floor((block.y+block.height/2)/love.window.getHeight()*mapH) + 1
+end
+
+function getBlockAtTilePos(tX, tY)
+	for i, block in ipairs(blocks) do
+		if(block.mapX == tX and block.mapY == tY) then
+			return block
+		end
+	end
 end
