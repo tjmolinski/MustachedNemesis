@@ -4,6 +4,7 @@ require 'puzzleBoard'
 require 'block'
 require 'boundingBox'
 
+gameOver = false 
 elapsedTime = 0;
 blocks = {}
 purpleBlock = love.graphics.newImage("block_purple.png")
@@ -18,32 +19,43 @@ greenBlock = love.graphics.newImage("block_green.png")
 greenGhostBlock = love.graphics.newImage("block_green_ghost.png")
 local growBuffer = 0;
 local growTime = 5;
+local paused = false
 
 function love.load(args)
-	love.window.setMode(400, 500, {} )
+	love.window.setMode(400, 440, {} )
 	initHero()
 	initPuzzleBoard()
+	love.graphics.setFont(love.graphics.newFont(20))
 end
 
 function love.update(dt)
-	elapsedTime = elapsedTime + dt;
-	if growBuffer > growTime then
-		growBuffer = 0;
-		liftHero()
-		addRowOfBlocks()
-	else
-		growBuffer = growBuffer + dt;
+	if not paused then
+	if not gameOver then
+		elapsedTime = elapsedTime + dt;
+		if growBuffer > growTime then
+			growBuffer = 0;
+			liftHero()
+			addRowOfBlocks()
+		else
+			growBuffer = growBuffer + dt;
+		end
+		updateHero(dt)
+		for i, block in ipairs(blocks) do
+			updateBlock(block, dt)
+		end
+		checkCollisions(dt)
 	end
-	updateHero(dt)
-	for i, block in ipairs(blocks) do
-		updateBlock(block, dt)
 	end
-	checkCollisions(dt)
 end
 
 function love.draw()
-	drawHero()
-	drawBlocks()
+	if gameOver then
+		love.graphics.print("GAME OVER", 100, 100)
+		love.graphics.print("Close and restart", 100, 200)
+	else
+		drawHero()
+		drawBlocks()
+	end
 end
 
 function love.keypressed(key, isRepeat)
@@ -51,6 +63,8 @@ function love.keypressed(key, isRepeat)
 		heroAction()
 	elseif key == "up" then
 		heroJump()
+	elseif key == "p" then
+		paused = not paused
 	end
 end
 

@@ -21,8 +21,10 @@ function initHero()
 	hero.onGround = false
 	hero.state = "idle"
 	hero.heldObject = nil
-	hero.slamSpeed = 200000
+	hero.slamSpeed = 90000
 	hero.slamming = false
+	hero.slamBuffer = 0
+	hero.preSlamTime = 0.25
 end
 
 function liftHero()
@@ -39,20 +41,24 @@ function updateHero(dt)
 end
 
 function handleSlam(dt)
-	hero.vx = 0
-	hero.vy = hero.slamSpeed * dt
+	hero.slamBuffer = hero.slamBuffer + dt
+	if hero.slamBuffer > hero.preSlamTime then
+		hero.vx = 0
+		hero.vy = hero.slamSpeed * dt
 
-	if hero.y >= love.window.getHeight() - hero.height then
-		hero.y = love.window.getHeight() - hero.height
-		hero.jumping = false
-		hero.onGround = true
-	end
-	
-	if hero.onGround then
-		hero.slamming = false
-	end
+		if hero.y >= getBoardHeight() - hero.height then
+			hero.y = getBoardHeight() - hero.height
+			hero.jumping = false
+			hero.onGround = true
+		end
+		
+		if hero.onGround then
+			hero.slamming = false
+			hero.slamBuffer = 0
+		end
 
-	moveHero(hero.vx * dt, hero.vy * dt)
+		moveHero(hero.vx * dt, hero.vy * dt)
+	end
 end
 
 function handlePhysics(dt)
@@ -69,8 +75,8 @@ function handlePhysics(dt)
 		hero.vy = hero.vy + (hero.gravity * dt)
 	end
 
-	if hero.y >= love.window.getHeight() - hero.height then
-		hero.y = love.window.getHeight() - hero.height
+	if hero.y >= getBoardHeight() - hero.height then
+		hero.y = getBoardHeight() - hero.height
 		if not hero.onGround then
 			hero.vx = 0
 		end
@@ -81,9 +87,18 @@ function handlePhysics(dt)
 		hero.x = 0
 		hero.vx = 0
 	end
-	if hero.x >= love.window.getWidth() - hero.width then
-		hero.x = love.window.getWidth() - hero.width
+	if hero.x >= getBoardWidth() - hero.width then
+		hero.x = getBoardWidth() - hero.width
 		hero.vx = 0
+	end
+	if hero.state == "holding" then
+		if hero.y <= tileH then
+			hero.y = tileH
+		end
+	else
+		if hero.y <= 0 then
+			hero.y = 0
+		end
 	end
 end
 
@@ -99,7 +114,7 @@ function handleInput(dt)
 	if love.keyboard.isDown("down") then
 		hero.direction = 0
 		if not hero.onGround then
-			--hero.slamming = true
+			hero.slamming = true
 		end
 	end
 end
@@ -138,7 +153,7 @@ function drawHintReticule()
 			posY = _block.y - _block.height
 		else
 			posX = (myX - 1 + hero.direction) * tileW
-			posY = love.window.getHeight() - block.height
+			posY = getBoardHeight() - block.height
 		end
 
 		if hero.heldObject.mapId == 0 then
@@ -167,6 +182,7 @@ end
 
 function heroHitBlock(block)
 	hero.slamming = false
+	hero.slamBuffer = 0
 	if block.state == "lifted" then
 		--DO BETTER
 	elseif(block.y > hero.y) then
@@ -252,9 +268,9 @@ function grabRight()
 end
 
 function getHeroTileX()
-	return math.floor((hero.x+hero.width/2)/love.window.getWidth()*mapW) + 1
+	return math.floor((hero.x+hero.width/2)/getBoardWidth()*mapW) + 1
 end
 
 function getHeroTileY()
-	return math.floor((hero.y+hero.height/2)/love.window.getHeight()*mapH) + 1
+	return math.floor((hero.y+hero.height/2)/getBoardHeight()*mapH) + 1
 end

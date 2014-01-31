@@ -51,8 +51,7 @@ function idle(block)
 	local bx = block.mapX
 	local by = block.mapY
 	local _block = getBlockAtTilePos(bx, by+1)
-	--if by+1 < mapH then
-	if block.y < love.window.getHeight() - block.height then
+	if block.y < getBoardHeight() - block.height then
 		if not _block then
 			block.state = "falling"
 			map[block.mapY][block.mapX] = 0
@@ -62,8 +61,8 @@ function idle(block)
 end
 
 function falling(block, dt)
-	if block.y >= love.window.getHeight() - block.height then
-		block.y = love.window.getHeight() - block.height
+	if block.y >= getBoardHeight() - block.height then
+		block.y = getBoardHeight() - block.height
 		block.state = "idle"
 		--map[block.mapY][block.mapX] = 0
 		block.mapY = mapH
@@ -171,11 +170,11 @@ function removeBlock(temp)
 end
 
 function getBlockTileX(block)
-	return math.floor((block.x+block.width/2)/love.window.getWidth()*mapW) + 1
+	return math.floor((block.x+block.width/2)/getBoardHeight()*mapW) + 1
 end
 
 function getBlockTileY(block)
-	return math.floor((block.y+block.height/2)/love.window.getHeight()*mapH) + 1
+	return math.floor((block.y+block.height/2)/getBoardHeight()*mapH) + 1
 end
 
 function getBlockAtTilePos(tX, tY)
