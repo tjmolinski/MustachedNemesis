@@ -1,6 +1,7 @@
 --hero.lua
 require 'block'
 require 'puzzleBoard'
+require 'utils'
 
 hero = {}
 
@@ -12,16 +13,16 @@ function initHero()
 	hero.width = 20
 	hero.height = 20 
 	hero.speed = 700
-	hero.jumpSpeed = 300
+	hero.jumpSpeed = 500
 	hero.friction = 0.1
-	hero.airFriction = 0.1
+	hero.airFriction = 0.01
 	hero.gravity = 280
 	hero.direction = 0
 	hero.jumping = false
 	hero.onGround = false
 	hero.state = "idle"
 	hero.heldObject = nil
-	hero.slamSpeed = 90000
+	hero.slamSpeed = 100000
 	hero.slamming = false
 	hero.slamBuffer = 0
 	hero.preSlamTime = 0.25
@@ -31,7 +32,16 @@ function liftHero()
 	hero.y = hero.y - block.height
 end
 
+function keyPressedHero(key, isRepeat)
+	if key == " " then
+		heroAction()
+	elseif key == "up" then
+		heroJump()
+	end
+end
+
 function updateHero(dt)
+	handleCollisions(dt)
 	if hero.slamming then
 		handleSlam(dt)
 	else
@@ -55,9 +65,9 @@ function handleSlam(dt)
 		if hero.onGround then
 			hero.slamming = false
 			hero.slamBuffer = 0
+		else
+			moveHero(hero.vx * dt, hero.vy * dt)
 		end
-
-		moveHero(hero.vx * dt, hero.vy * dt)
 	end
 end
 
@@ -68,7 +78,7 @@ function handlePhysics(dt)
 
 	if hero.jumping then
 		hero.vy = hero.vy * math.pow(hero.airFriction, dt)
-		if hero.vy >= -5.0 then
+		if hero.vy >= -50.0 then
 			hero.jumping = false
 		end
 	elseif not hero.onGround then
@@ -142,8 +152,8 @@ end
 
 function drawHintReticule()
 	if hero.state == "holding" then
-		local myX = getHeroTileX()
-		local myY = getHeroTileY()
+		local myX = getObjectTileX(hero)
+		local myY = getObjectTileY(hero)
 		local _block = getClosestBlockBelow(myX+hero.direction, myY)
 		local posX
 		local posY
@@ -183,6 +193,7 @@ end
 function heroHitBlock(block)
 	hero.slamming = false
 	hero.slamBuffer = 0
+	hero.onGround = true
 	if block.state == "lifted" then
 		--DO BETTER
 	elseif(block.y > hero.y) then
@@ -217,6 +228,20 @@ function heroAction()
 	end
 end
 
+function handleCollisions(dt)
+	local hit = false
+	for i, block in ipairs(blocks) do
+		if checkCollision(hero.x, hero.y, hero.width, hero.height, block.x, block.y, block.width, block.height) then
+			heroHitBlock(block)
+			hit = true
+		end
+	end
+
+	if not hit then
+		hero.onGround = false
+	end
+end
+
 function dropBelow()
 	if hero.heldObject then
 		dropBlock(hero.heldObject)
@@ -225,23 +250,23 @@ function dropBelow()
 end
 
 function dropRight()
-	local _block = getBlockAtTilePos(getHeroTileX()+1, getHeroTileY())
-	if (not _block) and hero.heldObject and getHeroTileX() + 1 <= mapW then
+	local _block = getBlockAtTilePos(getObjectTileX(hero)+1, getObjectTileY(hero))
+	if (not _block) and hero.heldObject and getObjectTileX(hero) + 1 <= mapW then
 		dropBlockRight(hero.heldObject)
 		hero.state = "idle"
 	end
 end
 
 function dropLeft()
-	local _block = getBlockAtTilePos(getHeroTileX()-1, getHeroTileY())
-	if (not _block) and hero.heldObject and getHeroTileX() - 1 > 0 then
+	local _block = getBlockAtTilePos(getObjectTileX(hero)-1, getObjectTileY(hero))
+	if (not _block) and hero.heldObject and getObjectTileX(hero) - 1 > 0 then
 		dropBlockLeft(hero.heldObject)
 		hero.state = "idle"
 	end
 end
 
 function grabBelow()
-	local _block = getBlockAtTilePos(getHeroTileX(), getHeroTileY()+1)
+	local _block = getBlockAtTilePos(getObjectTileX(hero), getObjectTileY(hero)+1)
 	if _block then
 		hero.heldObject = _block
 		liftBlock(_block)
@@ -250,7 +275,7 @@ function grabBelow()
 end
 
 function grabLeft()
-	local _block = getBlockAtTilePos(getHeroTileX()-1, getHeroTileY())
+	local _block = getBlockAtTilePos(getObjectTileX(hero)-1, getObjectTileY(hero))
 	if _block then
 		hero.heldObject = _block
 		liftBlock(_block)
@@ -259,18 +284,10 @@ function grabLeft()
 end
 
 function grabRight()
-	local _block = getBlockAtTilePos(getHeroTileX()+1, getHeroTileY())
+	local _block = getBlockAtTilePos(getObjectTileX(hero)+1, getObjectTileY(hero))
 	if _block then
 		hero.heldObject = _block
 		liftBlock(_block)
 		hero.state = "holding"
 	end
-end
-
-function getHeroTileX()
-	return math.floor((hero.x+hero.width/2)/getBoardWidth()*mapW) + 1
-end
-
-function getHeroTileY()
-	return math.floor((hero.y+hero.height/2)/getBoardHeight()*mapH) + 1
 end

@@ -40,7 +40,6 @@ function updateBlock(block, dt)
 	elseif block.state == "matched" then
 		removeBlock(block)
 	elseif block.state == "idle" then
-		checkForMatches()
 		idle(block)
 	elseif block.state == "lifted" then
 		followAbove(block, hero)
@@ -129,10 +128,10 @@ end
 
 function dropBlock(block)
 	block.state = "falling"
-	block.x = (getBlockTileX(hero)-1) * tileW
+	block.x = (getObjectTileX(hero)-1) * tileW
 	block.y = hero.y - hero.height
-	block.mapX = getBlockTileX(hero)
-	block.mapY = getBlockTileY(hero)
+	block.mapX = getObjectTileX(hero)
+	block.mapY = getObjectTileY(hero)
 	block.dirty = true
 	map[block.mapY][block.mapX] = block.mapId
 	hero.y = hero.y - block.height
@@ -140,21 +139,20 @@ end
 
 function dropBlockLeft(block)
 	block.state = "falling"
-	block.x = (getBlockTileX(hero)-2) * tileW
+	block.x = (getObjectTileX(hero)-2) * tileW
 	block.y = hero.y - hero.height
-	block.mapX = getBlockTileX(hero) - 1
-	block.mapY = getBlockTileY(hero)
+	block.mapX = getObjectTileX(hero) - 1
+	block.mapY = getObjectTileY(hero)
 	block.dirty = true
 	map[block.mapY][block.mapX] = block.mapId
 end
 
 function dropBlockRight(block)
 	block.state = "falling"
-	block.x = (getBlockTileX(hero)) * tileW
+	block.x = (getObjectTileX(hero)) * tileW
 	block.y = hero.y - hero.height
-	block.mapX = getBlockTileX(hero) - 1
-	block.mapX = getBlockTileX(hero) + 1
-	block.mapY = getBlockTileY(hero)
+	block.mapX = getObjectTileX(hero) + 1
+	block.mapY = getObjectTileY(hero)
 	block.dirty = true
 	map[block.mapY][block.mapX] = block.mapId
 end
@@ -167,14 +165,6 @@ function removeBlock(temp)
 			table.remove(blocks, i)
 		end
 	end
-end
-
-function getBlockTileX(block)
-	return math.floor((block.x+block.width/2)/getBoardHeight()*mapW) + 1
-end
-
-function getBlockTileY(block)
-	return math.floor((block.y+block.height/2)/getBoardHeight()*mapH) + 1
 end
 
 function getBlockAtTilePos(tX, tY)

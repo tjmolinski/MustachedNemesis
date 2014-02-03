@@ -1,6 +1,7 @@
 --puzzleBoard.lua
 require 'block'
 require 'boundingBox'
+require 'utils'
 
 tile = {}
 matches = {}
@@ -59,9 +60,9 @@ function checkForHorizontalMatches(x, y)
 	local tempMatches = {}
         for ty=y, mapH do
                 local color = map[ty][x]
-                local tempMatches = {}
-                for tx=x+1, mapW do
-			if ty > 0 then
+		if ty > 0 and ty <= mapH then
+			local tempMatches = {}
+			for tx=x+1, mapW do
 				if color == map[ty][tx] and color > 0 then
 					table.insert(tempMatches, tx)
 					table.insert(tempMatches, ty)
@@ -69,9 +70,7 @@ function checkForHorizontalMatches(x, y)
 					break
 				end
 			end
-                end
-                for tx=0, x do
-			if y-ty > 0 and y-ty <= mapH then
+			for tx=0, x do
 				if color == map[ty][x-tx] and color > 0 then
 					table.insert(tempMatches, x-tx)
 					table.insert(tempMatches, ty)
@@ -79,34 +78,34 @@ function checkForHorizontalMatches(x, y)
 					break
 				end
 			end
-                end
-                if size(tempMatches) > 5 then
-                        for idx=1, size(tempMatches) do
-                                if idx % 2 > 0 then
-                                        local _block = getBlockAtTilePos(tempMatches[idx],tempMatches[idx+1])
-					table.insert(matches, _block)
-                                end
-                        end
-                end
+			if size(tempMatches) > 5 then
+				for idx=1, size(tempMatches) do
+					if idx % 2 ~= 0 then
+						local _block = getBlockAtTilePos(tempMatches[idx],tempMatches[idx+1])
+						table.insert(matches, _block)
+					end
+				end
+			end
+		end
         end
 end
 
 function checkForVerticalMatches(x, y)
 	local tempMatches = {}
         for tx=x, mapW do
-                local color = map[y][tx]
-                local tempMatches = {}
-                for ty=y+1, mapH do
-			if ty > 0 then
+		local color = map[y][tx]
+		local tempMatches = {}
+		for ty=y+1, mapH do
+			if ty > 0 and ty <= mapH then
 				if color == map[ty][tx] and color > 0 then
 					table.insert(tempMatches, tx)
 					table.insert(tempMatches, ty)
 				else
 					break
 				end
-                        end
-                end
-                for ty=0, y do
+			end
+		end
+		for ty=0, y do
 			if y-ty > 0 and y-ty <= mapH then
 				if color == map[y-ty][tx] and color > 0 then
 					table.insert(tempMatches, tx)
@@ -114,17 +113,17 @@ function checkForVerticalMatches(x, y)
 				else
 					break
 				end
-                        end
-                end
-                if size(tempMatches) > 5 then
-                        for idx=1, size(tempMatches) do
-                                if idx % 2 ~= 0 then
-                                        local _block = getBlockAtTilePos(tempMatches[idx],tempMatches[idx+1])
+			end
+		end
+		if size(tempMatches) > 5 then
+			for idx=1, size(tempMatches) do
+				if idx % 2 ~= 0 then
+					local _block = getBlockAtTilePos(tempMatches[idx],tempMatches[idx+1])
 					table.insert(matches, _block)
-                                end
-                        end
-                end
-        end
+				end
+			end
+		end
+	end
 end
 
 function checkForMatches()
@@ -178,7 +177,6 @@ function addRowOfBlocks()
 			if block and y==1 then
 				gameOver = true	
 			elseif block then
-				--startTween(block, block.x, block.y - block.height)
 				block.y = block.y - block.height
 				map[y][x] = 0;	
 				map[y-1][x] = block.mapId;	
@@ -198,12 +196,4 @@ function logBoard()
 		print(map[y][1].." "..map[y][2].." "..map[y][3].." "..map[y][4].." "..map[y][5].." "..map[y][6].." "..map[y][7].." "..map[y][8].." "..map[y][9].." "..map[y][10])
 	end
 	print("=======================================")
-end
-
-function size(tble)
-	local cnt = 0
-	for tble in pairs(tble) do
-		cnt = 1 + cnt
-	end
-	return cnt
 end
