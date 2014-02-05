@@ -12,7 +12,9 @@ function initBlock(newX, newY, mapX, mapY)
 	block.mapY = mapY
 	block.dirty = false
 	block.state = "idle"
-	getColor(love.math.random(4))
+	block.scale = 1
+	block.destroySpeed = 1
+	getColor(love.math.random(1,5))
 	table.insert(blocks, block)
 	map[block.mapY][block.mapX] = block.mapId
 	return block
@@ -22,28 +24,24 @@ function getColor(id)
 	block.mapId = id
 end
 
-function startTween(block, tx, ty)
-	block.tweenX = tx
-	block.tweenY = ty	
-	block.startX = block.x
-	block.startY = block.y
-	block.state = "tween"
-end
-
-function isNear(pos1, pos2)
-	return pos1-1.0 < pos2 and pos1+1.0 > pos2
-end
-
 function updateBlock(block, dt)
 	if block.state == "falling" then
 		falling(block, dt)
 	elseif block.state == "matched" then
-		removeBlock(block)
+		matched(block, dt)
 	elseif block.state == "idle" then
 		idle(block)
 	elseif block.state == "lifted" then
 		followAbove(block, hero)
 	end
+end
+
+function matched(block, dt)
+	if block.scale < 0.1 then
+		removeBlock(block)
+	end
+
+	block.scale = block.scale - (block.destroySpeed * dt)
 end
 
 function idle(block)
@@ -63,7 +61,6 @@ function falling(block, dt)
 	if block.y >= getBoardHeight() - block.height then
 		block.y = getBoardHeight() - block.height
 		block.state = "idle"
-		--map[block.mapY][block.mapX] = 0
 		block.mapY = mapH
 		map[block.mapY][block.mapX] = block.mapId
 		checkForMatches()
@@ -95,10 +92,6 @@ function followAbove(block, parent)
 	block.y = parent.y - block.height
 end
 
-function tween(et, begin, change, duration)
-	return change * et / duration + begin
-end
-
 function drawBlocks()
 	for i, block in ipairs(blocks) do
 		drawBlock(block)
@@ -106,16 +99,16 @@ function drawBlocks()
 end
 
 function drawBlock(block)
-	if block.mapId == 0 then
-		love.graphics.draw(blueBlock, block.x, block.y)
-	elseif block.mapId == 1 then
-		love.graphics.draw(greenBlock, block.x, block.y)
+	if block.mapId == 1 then
+		love.graphics.draw(blueBlock, block.x, block.y, 0, block.scale, block.scale, 0, 0)
 	elseif block.mapId == 2 then
-		love.graphics.draw(purpleBlock, block.x, block.y)
+		love.graphics.draw(greenBlock, block.x, block.y, 0, block.scale, block.scale, 0, 0)
 	elseif block.mapId == 3 then
-		love.graphics.draw(redBlock, block.x, block.y)
+		love.graphics.draw(purpleBlock, block.x, block.y, 0, block.scale, block.scale, 0, 0)
+	elseif block.mapId == 4 then
+		love.graphics.draw(redBlock, block.x, block.y, 0, block.scale, block.scale, 0, 0)
 	else
-		love.graphics.draw(yellowBlock, block.x, block.y)
+		love.graphics.draw(yellowBlock, block.x, block.y, 0, block.scale, block.scale, 0, 0)
 	end
 end
 

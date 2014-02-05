@@ -87,9 +87,6 @@ function handlePhysics(dt)
 
 	if hero.y >= getBoardHeight() - hero.height then
 		hero.y = getBoardHeight() - hero.height
-		if not hero.onGround then
-			hero.vx = 0
-		end
 		hero.jumping = false
 		hero.onGround = true
 	end
@@ -166,13 +163,14 @@ function drawHintReticule()
 			posY = getBoardHeight() - block.height
 		end
 
-		if hero.heldObject.mapId == 0 then
+		--Why does hero draw hint blocks...
+		if hero.heldObject.mapId == 1 then
 			love.graphics.draw(blueGhostBlock, posX, posY)
-		elseif hero.heldObject.mapId == 1 then
-			love.graphics.draw(greenGhostBlock, posX, posY)
 		elseif hero.heldObject.mapId == 2 then
-			love.graphics.draw(purpleGhostBlock, posX, posY) 
+			love.graphics.draw(greenGhostBlock, posX, posY)
 		elseif hero.heldObject.mapId == 3 then
+			love.graphics.draw(purpleGhostBlock, posX, posY) 
+		elseif hero.heldObject.mapId == 4 then
 			love.graphics.draw(redGhostBlock, posX, posY)
 		else
 			love.graphics.draw(yellowGhostBlock, posX, posY)

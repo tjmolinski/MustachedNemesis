@@ -86,6 +86,7 @@ function checkForHorizontalMatches(x, y)
 					end
 				end
 			end
+			tempMatches = {}
 		end
         end
 end
@@ -123,6 +124,7 @@ function checkForVerticalMatches(x, y)
 				end
 			end
 		end
+		tempMatches = {}
 	end
 end
 
