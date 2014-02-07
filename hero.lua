@@ -1,157 +1,168 @@
 --hero.lua
-require 'block'
-require 'puzzleBoard'
 require 'utils'
+require 'puzzleBoard'
+require 'block'
 
-hero = {}
+Hero = {}
+Hero.__index = Hero
 
-function initHero()
-	hero.x = 200
-	hero.y = 250
-	hero.vx = 0
-	hero.vy = 0
-	hero.width = 20
-	hero.height = 20 
-	hero.speed = 700
-	hero.jumpSpeed = 500
-	hero.friction = 0.1
-	hero.airFriction = 0.01
-	hero.gravity = 280
-	hero.direction = 0
-	hero.jumping = false
-	hero.onGround = false
-	hero.state = "idle"
-	hero.heldObject = nil
-	hero.slamSpeed = 100000
-	hero.slamming = false
-	hero.slamBuffer = 0
-	hero.preSlamTime = 0.25
+SPEED = 700
+JUMP_POWER = -500
+FRICTION = 0.1
+AIR_FRICTION = 0.01
+GRAVITY = 280
+SLAM_POWER = 100000
+PRE_SLAM_TIME = 0.25
+HERO_WIDTH = 20
+HERO_HEIGHT = 20
+
+function Hero.create()
+	local self = {}
+	setmetatable(self, Hero)
+	self:reset()
+	return self
 end
 
-function liftHero()
-	hero.y = hero.y - block.height
+function Hero:reset()
+	self.x = 200
+	self.y = 250
+	self.vx = 0
+	self.vy = 0
+	self.direction = 0
+	self.jumping = false
+	self.onGround = false
+	self.state = "idle"
+	self.heldObject = nil
+	self.slamming = false
+	self.slamBuffer = 0
+	self.height = HERO_HEIGHT
+	self.width = HERO_WIDTH
 end
 
-function keyPressedHero(key, isRepeat)
+function Hero:lift()
+	self.y = self.y - tileH 
+end
+
+function Hero:keyPressed(key, isRepeat)
 	if key == " " then
-		heroAction()
+		self:action()
 	elseif key == "up" then
-		heroJump()
+		self:jump()
 	end
 end
 
-function updateHero(dt)
-	handleCollisions(dt)
-	if hero.slamming then
-		handleSlam(dt)
+function Hero:update(dt)
+	self:handleCollisions(dt)
+	if self.slamming then
+		self:handleSlam(dt)
 	else
-		handleInput(dt)
-		handlePhysics(dt)
+		self:handleInput(dt)
+		self:handlePhysics(dt)
 	end
 end
 
-function handleSlam(dt)
-	hero.slamBuffer = hero.slamBuffer + dt
-	if hero.slamBuffer > hero.preSlamTime then
-		hero.vx = 0
-		hero.vy = hero.slamSpeed * dt
+function Hero:handleSlam(dt)
+	self.slamBuffer = self.slamBuffer + dt
+	if self.slamBuffer > PRE_SLAM_TIME then
+		self.vx = 0
+		self.vy = SLAM_POWER * dt
 
-		if hero.y >= getBoardHeight() - hero.height then
-			hero.y = getBoardHeight() - hero.height
-			hero.jumping = false
-			hero.onGround = true
+		if self.y >= getBoardHeight() - HERO_HEIGHT then
+			self.y = getBoardHeight() - HERO_HEIGHT
+			self.jumping = false
+			self.onGround = true
 		end
 		
-		if hero.onGround then
-			hero.slamming = false
-			hero.slamBuffer = 0
+		if self.onGround then
+			self.slamming = false
+			self.slamBuffer = 0
 		else
-			moveHero(hero.vx * dt, hero.vy * dt)
+			self:move(self.vx * dt, self.vy * dt)
 		end
 	end
 end
 
-function handlePhysics(dt)
-	moveHero(hero.vx * dt, hero.vy * dt)
+function Hero:handlePhysics(dt)
+	self:move(self.vx * dt, self.vy * dt)
 
-	hero.vx = hero.vx * math.pow(hero.friction, dt)
+	self.vx = self.vx * math.pow(FRICTION, dt)
 
-	if hero.jumping then
-		hero.vy = hero.vy * math.pow(hero.airFriction, dt)
-		if hero.vy >= -50.0 then
-			hero.jumping = false
+	if self.jumping then
+		self.vy = self.vy * math.pow(AIR_FRICTION, dt)
+		if self.vy >= -50.0 then
+			self.jumping = false
 		end
-	elseif not hero.onGround then
-		hero.vy = hero.vy + (hero.gravity * dt)
+	elseif not self.onGround then
+		self.vy = self.vy + (GRAVITY * dt)
 	end
 
-	if hero.y >= getBoardHeight() - hero.height then
-		hero.y = getBoardHeight() - hero.height
-		hero.jumping = false
-		hero.onGround = true
+	if self.y >= getBoardHeight() - HERO_HEIGHT then
+		self.y = getBoardHeight() - HERO_HEIGHT
+		self.jumping = false
+		self.onGround = true
 	end
-	if hero.x <= 0 then
-		hero.x = 0
-		hero.vx = 0
+	if self.x <= 0 then
+		self.x = 0
+		self.vx = 0
 	end
-	if hero.x >= getBoardWidth() - hero.width then
-		hero.x = getBoardWidth() - hero.width
-		hero.vx = 0
+	if self.x >= getBoardWidth() - HERO_WIDTH then
+		self.x = getBoardWidth() - HERO_WIDTH
+		self.vx = 0
 	end
-	if hero.state == "holding" then
-		if hero.y <= tileH then
-			hero.y = tileH
+	if self.state == "holding" then
+		if self.y <= tileH then
+			self.y = tileH
 		end
 	else
-		if hero.y <= 0 then
-			hero.y = 0
+		if self.y <= 0 then
+			self.y = 0
 		end
 	end
 end
 
-function handleInput(dt)
+function Hero:handleInput(dt)
 	if love.keyboard.isDown("left") then
-		hero.vx = hero.vx - (hero.speed * dt)
-		hero.direction = -1
+		self.vx = self.vx - (SPEED * dt)
+		self.direction = -1
 	end
 	if love.keyboard.isDown("right") then
-		hero.vx = hero.vx + (hero.speed * dt)
-		hero.direction = 1
+		self.vx = self.vx + (SPEED * dt)
+		self.direction = 1
 	end
 	if love.keyboard.isDown("down") then
-		hero.direction = 0
-		if not hero.onGround then
-			hero.slamming = true
+		self.direction = 0
+		if not self.onGround then
+			self.slamming = true
 		end
 	end
 end
 
-function heroJump()
-	if not hero.jumping then
-		hero.jumping = true
-		hero.onGround = false
-		hero.vy = -hero.jumpSpeed
+function Hero:jump()
+	if not self.jumping then
+		self.jumping = true
+		self.onGround = false
+		self.vy = JUMP_POWER
 	end
 end
 
-function moveHero(dx, dy)
-	hero.x = hero.x + dx
-	hero.y = hero.y + dy
+function Hero:move(dx, dy)
+	self.x = self.x + dx
+	self.y = self.y + dy
 end
 
-function drawHero()
+function Hero:draw()
 	local pr, pg, pb, pa = love.graphics.getColor()
 	love.graphics.setColor(255, 0, 0)
-	love.graphics.rectangle("fill", hero.x, hero.y, hero.width, hero.height)
+	love.graphics.rectangle("fill", self.x, self.y, HERO_WIDTH, HERO_HEIGHT)
 	love.graphics.setColor(pr, pg, pb, pa)
-	drawHintReticule()
+	self:drawHintReticule()
 end
 
-function drawHintReticule()
-	if hero.state == "holding" then
-		local myX = getObjectTileX(hero)
-		local myY = getObjectTileY(hero)
-		local _block = getClosestBlockBelow(myX+hero.direction, myY)
+function Hero:drawHintReticule()
+	if self.state == "holding" then
+		local myX = getObjectTileX(self)
+		local myY = getObjectTileY(self)
+		local _block = self:getClosestBlockBelow(myX+self.direction, myY)
 		local posX
 		local posY
 
@@ -159,18 +170,18 @@ function drawHintReticule()
 			posX = _block.x
 			posY = _block.y - _block.height
 		else
-			posX = (myX - 1 + hero.direction) * tileW
-			posY = getBoardHeight() - block.height
+			posX = (myX - 1 + self.direction) * tileW
+			posY = getBoardHeight() - tileH
 		end
 
 		--Why does hero draw hint blocks...
-		if hero.heldObject.mapId == 1 then
+		if self.heldObject.mapId == 1 then
 			love.graphics.draw(blueGhostBlock, posX, posY)
-		elseif hero.heldObject.mapId == 2 then
+		elseif self.heldObject.mapId == 2 then
 			love.graphics.draw(greenGhostBlock, posX, posY)
-		elseif hero.heldObject.mapId == 3 then
+		elseif self.heldObject.mapId == 3 then
 			love.graphics.draw(purpleGhostBlock, posX, posY) 
-		elseif hero.heldObject.mapId == 4 then
+		elseif self.heldObject.mapId == 4 then
 			love.graphics.draw(redGhostBlock, posX, posY)
 		else
 			love.graphics.draw(yellowGhostBlock, posX, posY)
@@ -178,7 +189,7 @@ function drawHintReticule()
 	end
 end
 
-function getClosestBlockBelow(myX, myY)
+function Hero:getClosestBlockBelow(myX, myY)
 	local spaces = mapH - myY
 	for i=1, spaces do
 		local _block = getBlockAtTilePos(myX, myY+i)
@@ -188,104 +199,104 @@ function getClosestBlockBelow(myX, myY)
 	end	
 end
 
-function heroHitBlock(block)
-	hero.slamming = false
-	hero.slamBuffer = 0
-	hero.onGround = true
+function Hero:hitBlock(block)
+	self.slamming = false
+	self.slamBuffer = 0
+	self.onGround = true
 	if block.state == "lifted" then
 		--DO BETTER
-	elseif(block.y > hero.y) then
-		hero.y = block.y - hero.height
-		hero.vy = 0
-	elseif(block.x < hero.x) then
-		hero.x = block.x + block.width
-		hero.vx = 0
-	elseif(block.x > hero.x) then
-		hero.x = block.x - hero.width
-		hero.vx = 0
+	elseif(block.y > self.y) then
+		self.y = block.y - HERO_HEIGHT
+		self.vy = 0
+	elseif(block.x < self.x) then
+		self.x = block.x + block.width
+		self.vx = 0
+	elseif(block.x > self.x) then
+		self.x = block.x - HERO_WIDTH
+		self.vx = 0
 	end
 end
 
-function heroAction()
-	if hero.state == "idle" then
-		if hero.direction == 0 then --lift block below
-			grabBelow()
-		elseif hero.direction == 1 then --lift block right
-			grabRight()
-		elseif hero.direction == -1 then --lift block left
-			grabLeft()
+function Hero:action()
+	if self.state == "idle" then
+		if self.direction == 0 then --lift block below
+			self:grabBelow()
+		elseif self.direction == 1 then --lift block right
+			self:grabRight()
+		elseif self.direction == -1 then --lift block left
+			self:grabLeft()
 		end
-	elseif hero.state == "holding" then
-		if hero.direction == 0 then --drop block below
-			dropBelow()
-		elseif hero.direction == 1 then --drop block right
-			dropRight()
-		elseif hero.direction == -1 then --drop block left
-			dropLeft()
+	elseif self.state == "holding" then
+		if self.direction == 0 then --drop block below
+			self:dropBelow()
+		elseif self.direction == 1 then --drop block right
+			self:dropRight()
+		elseif self.direction == -1 then --drop block left
+			self:dropLeft()
 		end
 	end
 end
 
-function handleCollisions(dt)
+function Hero:handleCollisions(dt)
 	local hit = false
 	for i, block in ipairs(blocks) do
-		if checkCollision(hero.x, hero.y, hero.width, hero.height, block.x, block.y, block.width, block.height) then
-			heroHitBlock(block)
+		if checkCollision(self.x, self.y, HERO_WIDTH, HERO_HEIGHT, block.x, block.y, block.width, block.height) then
+			self:hitBlock(block)
 			hit = true
 		end
 	end
 
 	if not hit then
-		hero.onGround = false
+		self.onGround = false
 	end
 end
 
-function dropBelow()
-	if hero.heldObject then
-		dropBlock(hero.heldObject)
-		hero.state = "idle"
+function Hero:dropBelow()
+	if self.heldObject then
+		self.heldObject:dropBlock()
+		self.state = "idle"
 	end
 end
 
-function dropRight()
-	local _block = getBlockAtTilePos(getObjectTileX(hero)+1, getObjectTileY(hero))
-	if (not _block) and hero.heldObject and getObjectTileX(hero) + 1 <= mapW then
-		dropBlockRight(hero.heldObject)
-		hero.state = "idle"
+function Hero:dropRight()
+	local _block = getBlockAtTilePos(getObjectTileX(self)+1, getObjectTileY(self))
+	if (not _block) and self.heldObject and getObjectTileX(self) + 1 <= mapW then
+		self.heldObject:dropBlockRight()
+		self.state = "idle"
 	end
 end
 
-function dropLeft()
-	local _block = getBlockAtTilePos(getObjectTileX(hero)-1, getObjectTileY(hero))
-	if (not _block) and hero.heldObject and getObjectTileX(hero) - 1 > 0 then
-		dropBlockLeft(hero.heldObject)
-		hero.state = "idle"
+function Hero:dropLeft()
+	local _block = getBlockAtTilePos(getObjectTileX(self)-1, getObjectTileY(self))
+	if (not _block) and self.heldObject and getObjectTileX(self) - 1 > 0 then
+		self.heldObject:dropBlockLeft()
+		self.state = "idle"
 	end
 end
 
-function grabBelow()
-	local _block = getBlockAtTilePos(getObjectTileX(hero), getObjectTileY(hero)+1)
+function Hero:grabBelow()
+	local _block = getBlockAtTilePos(getObjectTileX(self), getObjectTileY(self)+1)
 	if _block then
-		hero.heldObject = _block
-		liftBlock(_block)
-		hero.state = "holding"
+		self.heldObject = _block
+		_block:liftBlock()
+		self.state = "holding"
 	end
 end
 
-function grabLeft()
-	local _block = getBlockAtTilePos(getObjectTileX(hero)-1, getObjectTileY(hero))
+function Hero:grabLeft()
+	local _block = getBlockAtTilePos(getObjectTileX(self)-1, getObjectTileY(self))
 	if _block then
-		hero.heldObject = _block
-		liftBlock(_block)
-		hero.state = "holding"
+		self.heldObject = _block
+		_block:liftBlock()
+		self.state = "holding"
 	end
 end
 
-function grabRight()
-	local _block = getBlockAtTilePos(getObjectTileX(hero)+1, getObjectTileY(hero))
+function Hero:grabRight()
+	local _block = getBlockAtTilePos(getObjectTileX(self)+1, getObjectTileY(self))
 	if _block then
-		hero.heldObject = _block
-		liftBlock(_block)
-		hero.state = "holding"
+		self.heldObject = _block
+		_block:liftBlock()
+		self.state = "holding"
 	end
 end

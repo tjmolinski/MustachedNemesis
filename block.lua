@@ -1,169 +1,160 @@
 --block.lua
-require 'boundingBox'
+require 'utils'
+require 'puzzleBoard'
 
-function initBlock(newX, newY, mapX, mapY)
-	block = {}
-	block.width = 40
-	block.height = 40
-	block.fallSpeed = 600
-	block.x = newX
-	block.y = newY
-	block.mapX = mapX
-	block.mapY = mapY
-	block.dirty = false
-	block.state = "idle"
-	block.scale = 1
-	block.destroySpeed = 1
-	getColor(love.math.random(1,5))
-	table.insert(blocks, block)
-	map[block.mapY][block.mapX] = block.mapId
-	return block
+Block = {}
+Block.__index = Block
+
+function Block.create(newX, newY, mapX, mapY)
+	local self = {}
+	setmetatable(self, Block)
+	self.width = 40
+	self.height = 40
+	self.fallSpeed = 600
+	self.x = newX
+	self.y = newY
+	self.mapX = mapX
+	self.mapY = mapY
+	self.dirty = false
+	self.state = "idle"
+	self.scale = 1
+	self.destroySpeed = 1
+	self:getColor(love.math.random(1,5))
+	table.insert(blocks, self)
+	map[self.mapY][self.mapX] = self.mapId
+	return self
 end
 
-function getColor(id)
-	block.mapId = id
+function Block:getColor(id)
+	self.mapId = id
 end
 
-function updateBlock(block, dt)
-	if block.state == "falling" then
-		falling(block, dt)
-	elseif block.state == "matched" then
-		matched(block, dt)
-	elseif block.state == "idle" then
-		idle(block)
-	elseif block.state == "lifted" then
-		followAbove(block, hero)
+function Block:update(dt)
+	if self.state == "falling" then
+		self:falling(dt)
+	elseif self.state == "matched" then
+		self:matched(dt)
+	elseif self.state == "idle" then
+		self:idle()
+	elseif self.state == "lifted" then
+		self:followAbove(hero)
 	end
 end
 
-function matched(block, dt)
-	if block.scale < 0.1 then
-		removeBlock(block)
+function Block:matched(dt)
+	if self.scale < 0.1 then
+		self:remove()
 	end
 
-	block.scale = block.scale - (block.destroySpeed * dt)
+	self.scale = self.scale - (self.destroySpeed * dt)
 end
 
-function idle(block)
-	local bx = block.mapX
-	local by = block.mapY
+function Block:idle()
+	local bx = self.mapX
+	local by = self.mapY
 	local _block = getBlockAtTilePos(bx, by+1)
-	if block.y < getBoardHeight() - block.height then
+	if self.y < getBoardHeight() - self.height then
 		if not _block then
-			block.state = "falling"
-			map[block.mapY][block.mapX] = 0
-			block.mapY = -1
+			self.state = "falling"
+			map[self.mapY][self.mapX] = 0
+			self.mapY = -1
 		end
 	end
 end
 
-function falling(block, dt)
-	if block.y >= getBoardHeight() - block.height then
-		block.y = getBoardHeight() - block.height
-		block.state = "idle"
-		block.mapY = mapH
-		map[block.mapY][block.mapX] = block.mapId
-		checkForMatches()
+function Block:falling(dt)
+	if self.y >= getBoardHeight() - self.height then
+		self.y = getBoardHeight() - self.height
+		self.state = "idle"
+		self.mapY = mapH
+		map[self.mapY][self.mapX] = self.mapId
+		puzzleBoard:checkForMatches()
 	else
 		for i, _block in ipairs(blocks) do
-			if not (block.mapX == _block.mapX and block.mapY == _block.mapY) then
-				if checkCollision(block.x, block.y, block.width, block.height, _block.x, _block.y, _block.width, _block.height) and _block.state == "idle" then
-					block.state = "idle"
-					block.dirty = false
-					block.y = _block.y - block.height
-					block.mapX = _block.mapX
-					block.mapY = _block.mapY - 1
-					map[block.mapY][block.mapX] = block.mapId
-					checkForMatches()
+			if not (self.mapX == _block.mapX and self.mapY == _block.mapY) then
+				if checkCollision(self.x, self.y, self.width, self.height, _block.x, _block.y, _block.width, _block.height) and _block.state == "idle" then
+					self.state = "idle"
+					self.dirty = false
+					self.y = _block.y - self.height
+					self.mapX = _block.mapX
+					self.mapY = _block.mapY - 1
+					map[self.mapY][self.mapX] = self.mapId
+					puzzleBoard:checkForMatches()
 					break
 				end
 			end
 		end	
 	end
 
-	if block.state == "falling" then
-		block.dirty = true
-		block.y = block.y + (block.fallSpeed * dt)
+	if self.state == "falling" then
+		self.dirty = true
+		self.y = self.y + (self.fallSpeed * dt)
 	end
 end
 
-function followAbove(block, parent)
-	block.x = parent.x - (parent.width * 0.5)
-	block.y = parent.y - block.height
+function Block:followAbove(parent)
+	self.x = parent.x - (parent.width * 0.5)
+	self.y = parent.y - self.height
 end
 
-function drawBlocks()
-	for i, block in ipairs(blocks) do
-		drawBlock(block)
-	end
-end
-
-function drawBlock(block)
-	if block.mapId == 1 then
-		love.graphics.draw(blueBlock, block.x, block.y, 0, block.scale, block.scale, 0, 0)
-	elseif block.mapId == 2 then
-		love.graphics.draw(greenBlock, block.x, block.y, 0, block.scale, block.scale, 0, 0)
-	elseif block.mapId == 3 then
-		love.graphics.draw(purpleBlock, block.x, block.y, 0, block.scale, block.scale, 0, 0)
-	elseif block.mapId == 4 then
-		love.graphics.draw(redBlock, block.x, block.y, 0, block.scale, block.scale, 0, 0)
+function Block:draw()
+	if self.mapId == 1 then
+		love.graphics.draw(blueBlock, self.x, self.y, 0, self.scale, self.scale, 0, 0)
+	elseif self.mapId == 2 then
+		love.graphics.draw(greenBlock, self.x, self.y, 0, self.scale, self.scale, 0, 0)
+	elseif self.mapId == 3 then
+		love.graphics.draw(purpleBlock, self.x, self.y, 0, self.scale, self.scale, 0, 0)
+	elseif self.mapId == 4 then
+		love.graphics.draw(redBlock, self.x, self.y, 0, self.scale, self.scale, 0, 0)
 	else
-		love.graphics.draw(yellowBlock, block.x, block.y, 0, block.scale, block.scale, 0, 0)
+		love.graphics.draw(yellowBlock, self.x, self.y, 0, self.scale, self.scale, 0, 0)
 	end
 end
 
-function liftBlock(block)
-	block.state = "lifted"
-	map[block.mapY][block.mapX] = 0
-	block.mapY = 0
-	block.mapX = 0
+function Block:liftBlock()
+	self.state = "lifted"
+	map[self.mapY][self.mapX] = 0
+	self.mapY = 0
+	self.mapX = 0
 end
 
-function dropBlock(block)
-	block.state = "falling"
-	block.x = (getObjectTileX(hero)-1) * tileW
-	block.y = hero.y - hero.height
-	block.mapX = getObjectTileX(hero)
-	block.mapY = getObjectTileY(hero)
-	block.dirty = true
-	map[block.mapY][block.mapX] = block.mapId
-	hero.y = hero.y - block.height
+function Block:dropBlock()
+	self.state = "falling"
+	self.x = (getObjectTileX(hero)-1) * tileW
+	self.y = hero.y - hero.height
+	self.mapX = getObjectTileX(hero)
+	self.mapY = getObjectTileY(hero)
+	self.dirty = true
+	map[self.mapY][self.mapX] = self.mapId
+	hero.y = hero.y - self.height
 end
 
-function dropBlockLeft(block)
-	block.state = "falling"
-	block.x = (getObjectTileX(hero)-2) * tileW
-	block.y = hero.y - hero.height
-	block.mapX = getObjectTileX(hero) - 1
-	block.mapY = getObjectTileY(hero)
-	block.dirty = true
-	map[block.mapY][block.mapX] = block.mapId
+function Block:dropBlockLeft()
+	self.state = "falling"
+	self.x = (getObjectTileX(hero)-2) * tileW
+	self.y = hero.y - hero.height
+	self.mapX = getObjectTileX(hero) - 1
+	self.mapY = getObjectTileY(hero)
+	self.dirty = true
+	map[self.mapY][self.mapX] = self.mapId
 end
 
-function dropBlockRight(block)
-	block.state = "falling"
-	block.x = (getObjectTileX(hero)) * tileW
-	block.y = hero.y - hero.height
-	block.mapX = getObjectTileX(hero) + 1
-	block.mapY = getObjectTileY(hero)
-	block.dirty = true
-	map[block.mapY][block.mapX] = block.mapId
+function Block:dropBlockRight()
+	self.state = "falling"
+	self.x = (getObjectTileX(hero)) * tileW
+	self.y = hero.y - hero.height
+	self.mapX = getObjectTileX(hero) + 1
+	self.mapY = getObjectTileY(hero)
+	self.dirty = true
+	map[self.mapY][self.mapX] = self.mapId
 end
 
-function removeBlock(temp)
+function Block:remove()
 	--logBoard()
 	for i, block in ipairs(blocks) do
-		if(block.mapX == temp.mapX and block.mapY == temp.mapY) then
+		if(block.mapX == self.mapX and block.mapY == self.mapY) then
 			map[block.mapY][block.mapX] = 0
 			table.remove(blocks, i)
-		end
-	end
-end
-
-function getBlockAtTilePos(tX, tY)
-	for i, block in ipairs(blocks) do
-		if(block.mapX == tX and block.mapY == tY) then
-			return block
 		end
 	end
 end
