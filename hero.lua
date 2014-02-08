@@ -200,6 +200,10 @@ function Hero:getClosestBlockBelow(myX, myY)
 end
 
 function Hero:hitBlock(block)
+	if self.slamming then
+		screen_shake = 0.1
+	end
+
 	self.slamming = false
 	self.slamBuffer = 0
 	self.onGround = true
