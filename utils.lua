@@ -21,15 +21,6 @@ function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
 		y2 < y1 + h1
 end
 
-function removeBlock(temp)
-	for i, block in ipairs(blocks) do
-		if(block.mapX == temp.mapX and block.mapY == temp.mapY) then
-			map[block.mapY][block.mapX] = 0
-			table.remove(blocks, i)
-		end
-	end
-end
-
 function getBlockAtTilePos(tX, tY)
 	for i, block in ipairs(blocks) do
 		if(block.mapX == tX and block.mapY == tY) then

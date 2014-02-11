@@ -52,6 +52,7 @@ function Hero:keyPressed(key, isRepeat)
 end
 
 function Hero:update(dt)
+	self:checkGround(dt)
 	self:handleCollisions(dt)
 	if self.slamming then
 		self:handleSlam(dt)
@@ -59,6 +60,15 @@ function Hero:update(dt)
 		self:handleInput(dt)
 		self:handlePhysics(dt)
 	end
+end
+
+function Hero:checkGround(dt)
+	local myX = getObjectTileX(self)
+	local myY = getObjectTileY(self)
+	local _block = getBlockAtTilePos(myX, myY+1)
+	if not _block then
+		self.onGround = false
+	end	
 end
 
 function Hero:handleSlam(dt)
@@ -246,12 +256,7 @@ function Hero:handleCollisions(dt)
 	for i, block in ipairs(blocks) do
 		if checkCollision(self.x, self.y, HERO_WIDTH, HERO_HEIGHT, block.x, block.y, block.width, block.height) then
 			self:hitBlock(block)
-			hit = true
 		end
-	end
-
-	if not hit then
-		self.onGround = false
 	end
 end
 

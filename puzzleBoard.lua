@@ -64,75 +64,27 @@ function PuzzleBoard:createBlocks()
 		end
 	end
 end
-function PuzzleBoard:checkForHorizontalMatches(x, y)
-	local tempMatches = {}
-        for ty=y, mapH do
-                local color = map[ty][x]
-		if ty > 0 and ty <= mapH then
-			local tempMatches = {}
-			for tx=x+1, mapW do
-				if color == map[ty][tx] and color > 0 then
-					table.insert(tempMatches, tx)
-					table.insert(tempMatches, ty)
-				else
-					break
-				end
-			end
-			for tx=0, x do
-				if color == map[ty][x-tx] and color > 0 then
-					table.insert(tempMatches, x-tx)
-					table.insert(tempMatches, ty)
-				else
-					break
-				end
-			end
-			if size(tempMatches) > 5 then
-				for idx=1, size(tempMatches) do
-					if idx % 2 ~= 0 then
-						local _block = getBlockAtTilePos(tempMatches[idx],tempMatches[idx+1])
-						table.insert(matches, _block)
-					end
-				end
-			end
-			tempMatches = {}
-		end
-        end
-end
 
-function PuzzleBoard:checkForVerticalMatches(x, y)
-	local tempMatches = {}
-        for tx=x, mapW do
-		local color = map[y][tx]
-		local tempMatches = {}
-		for ty=y+1, mapH do
-			if ty > 0 and ty <= mapH then
-				if color == map[ty][tx] and color > 0 then
-					table.insert(tempMatches, tx)
-					table.insert(tempMatches, ty)
-				else
-					break
-				end
+function PuzzleBoard:floodFill(x, y, oldColor)
+	if map[y][x] == oldColor then
+		local _block = getBlockAtTilePos(x, y)
+		if _block and not _block.checked then
+			table.insert(matches, _block)
+			_block.checked = true
+
+			if (x+1) <= mapW then
+				self:floodFill(x+1, y, oldColor) --Check to the right
+			end
+			if (x-1) > 0 then
+				self:floodFill(x-1, y, oldColor) --Check to the left
+			end
+			if (y+1) <= mapH then
+				self:floodFill(x, y+1, oldColor) --Check the bottom
+			end
+			if (y-1) > 0 then
+				self:floodFill(x, y-1, oldColor) --Check the top
 			end
 		end
-		for ty=0, y do
-			if y-ty > 0 and y-ty <= mapH then
-				if color == map[y-ty][tx] and color > 0 then
-					table.insert(tempMatches, tx)
-					table.insert(tempMatches, y-ty)
-				else
-					break
-				end
-			end
-		end
-		if size(tempMatches) > 5 then
-			for idx=1, size(tempMatches) do
-				if idx % 2 ~= 0 then
-					local _block = getBlockAtTilePos(tempMatches[idx],tempMatches[idx+1])
-					table.insert(matches, _block)
-				end
-			end
-		end
-		tempMatches = {}
 	end
 end
 
@@ -142,9 +94,8 @@ function PuzzleBoard:checkForMatches()
 		for y=1, mapH do
 			for x=1, mapW do
 				if map[y][x] > 0 then
-					self:checkForHorizontalMatches(x, y)
-					self:checkForVerticalMatches(x, y)
-					if size(matches) > 2 then
+					self:floodFill(x, y, map[y][x])
+					if size(matches) > 3 then
 						for k in pairs(matches) do
 							matches[k].state = "matched"
 						end	

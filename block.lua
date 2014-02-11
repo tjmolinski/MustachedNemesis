@@ -150,7 +150,6 @@ function Block:dropBlockRight()
 end
 
 function Block:remove()
-	--logBoard()
 	for i, block in ipairs(blocks) do
 		if(block.mapX == self.mapX and block.mapY == self.mapY) then
 			map[block.mapY][block.mapX] = 0
