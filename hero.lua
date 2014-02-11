@@ -141,7 +141,7 @@ function Hero:handleInput(dt)
 	end
 	if love.keyboard.isDown("down") then
 		self.direction = 0
-		if not self.onGround then
+		if not self.onGround and not self.heldObject then
 			self.slamming = true
 		end
 	end
@@ -263,6 +263,7 @@ end
 function Hero:dropBelow()
 	if self.heldObject then
 		self.heldObject:dropBlock()
+		self.heldObject = nil
 		self.state = "idle"
 	end
 end
@@ -271,6 +272,7 @@ function Hero:dropRight()
 	local _block = getBlockAtTilePos(getObjectTileX(self)+1, getObjectTileY(self))
 	if (not _block) and self.heldObject and getObjectTileX(self) + 1 <= mapW then
 		self.heldObject:dropBlockRight()
+		self.heldObject = nil
 		self.state = "idle"
 	end
 end
@@ -279,6 +281,7 @@ function Hero:dropLeft()
 	local _block = getBlockAtTilePos(getObjectTileX(self)-1, getObjectTileY(self))
 	if (not _block) and self.heldObject and getObjectTileX(self) - 1 > 0 then
 		self.heldObject:dropBlockLeft()
+		self.heldObject = nil
 		self.state = "idle"
 	end
 end
