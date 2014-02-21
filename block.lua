@@ -15,6 +15,11 @@ function Block.create(newX, newY, mapX, mapY)
 	self.y = newY
 	self.mapX = mapX
 	self.mapY = mapY
+	self.lerpX = -1
+	self.lerpY = -1
+	self.lerpingTime = 0
+	self.lerpingSpeed = 1.5
+	self.lerping = false
 	self.dirty = false
 	self.state = "idle"
 	self.scale = 1
@@ -38,6 +43,28 @@ function Block:update(dt)
 		self:idle()
 	elseif self.state == "lifted" then
 		self:followAbove(hero)
+	end
+
+	if self.lerping then
+	      self:updateLerp(dt)
+	end
+end
+
+function Block:updateLerp(dt)
+	self.lerpingTime = self.lerpingTime + (self.lerpingSpeed * dt)
+	self.x = lerp(self.x, self.lerpX, self.lerpingTime)
+	self.y = lerp(self.y, self.lerpY, self.lerpingTime)
+	if self.lerpingTime >= 0.8 or (self.x == self.lerpX and self.y == self.lerpY) then
+		self.x = self.lerpX
+		self.Y = self.lerpY
+		local tX = getObjectTileX(self)
+		local tY = getObjectTileY(self)
+		self.lerping = false
+		map[tY][tX] = self.mapId
+		self.mapX = tX
+		self.mapY = tY
+		self.lerpingTime = 0
+		puzzleBoard:checkForMatches()
 	end
 end
 
@@ -112,6 +139,7 @@ function Block:draw()
 end
 
 function Block:liftBlock()
+	self.lerping = false
 	self.state = "lifted"
 	map[self.mapY][self.mapX] = 0
 	self.mapY = 0

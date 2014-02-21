@@ -39,10 +39,6 @@ function Hero:reset()
 	self.width = HERO_WIDTH
 end
 
-function Hero:lift()
-	self.y = self.y - tileH 
-end
-
 function Hero:keyPressed(key, isRepeat)
 	if key == " " then
 		self:action()
@@ -63,12 +59,22 @@ function Hero:update(dt)
 end
 
 function Hero:checkGround(dt)
-	local myX = getObjectTileX(self)
+	local myCenterX = getObjectTileX(self)
+	local myLeftX = getObjectTileLeftMostX(self)
+	local myRightX = getObjectTileRightMostX(self)
 	local myY = getObjectTileY(self)
-	local _block = getBlockAtTilePos(myX, myY+1)
-	if not _block then
-		self.onGround = false
-	end	
+
+	local _CenterBlock = getBlockAtTilePos(myCenterX, myY+1)
+	local _LeftBlock = getBlockAtTilePos(myLeftX, myY+1)
+	local _RightBlock = getBlockAtTilePos(myRightX, myY+1)
+
+	if _CenterBlock then self.onGround = true end	
+	if _LeftBlock then self.onGround = true end	
+	if _RightBlock then self.onGround = true end	
+
+	if (not _CenterBlock) and (not _LeftBlock) and (not _RightBlock) then
+	    self.onGround = false
+	end
 end
 
 function Hero:handleSlam(dt)
@@ -80,15 +86,9 @@ function Hero:handleSlam(dt)
 		if self.y >= getBoardHeight() - HERO_HEIGHT then
 			self.y = getBoardHeight() - HERO_HEIGHT
 			self.jumping = false
-			self.onGround = true
 		end
 		
-		if self.onGround then
-			self.slamming = false
-			self.slamBuffer = 0
-		else
-			self:move(self.vx * dt, self.vy * dt)
-		end
+		self:move(self.vx * dt, self.vy * dt)
 	end
 end
 
@@ -109,7 +109,6 @@ function Hero:handlePhysics(dt)
 	if self.y >= getBoardHeight() - HERO_HEIGHT then
 		self.y = getBoardHeight() - HERO_HEIGHT
 		self.jumping = false
-		self.onGround = true
 	end
 	if self.x <= 0 then
 		self.x = 0
@@ -150,7 +149,6 @@ end
 function Hero:jump()
 	if not self.jumping then
 		self.jumping = true
-		self.onGround = false
 		self.vy = JUMP_POWER
 	end
 end
@@ -211,12 +209,12 @@ end
 
 function Hero:hitBlock(block)
 	if self.slamming then
+	  print("Shake")
 		screen_shake = 0.1
 	end
 
 	self.slamming = false
 	self.slamBuffer = 0
-	self.onGround = true
 	if block.state == "lifted" then
 		--DO BETTER
 	elseif(block.y > self.y) then
@@ -252,7 +250,6 @@ function Hero:action()
 end
 
 function Hero:handleCollisions(dt)
-	local hit = false
 	for i, block in ipairs(blocks) do
 		if checkCollision(self.x, self.y, HERO_WIDTH, HERO_HEIGHT, block.x, block.y, block.width, block.height) then
 			self:hitBlock(block)
@@ -287,28 +284,39 @@ function Hero:dropLeft()
 end
 
 function Hero:grabBelow()
-	local _block = getBlockAtTilePos(getObjectTileX(self), getObjectTileY(self)+1)
-	if _block then
-		self.heldObject = _block
-		_block:liftBlock()
-		self.state = "holding"
-	end
+	local myX = getObjectTileX(self)
+	local myY = getObjectTileY(self)
+
+	if myY <= 1 then return end
+
+	local _block = getBlockAtTilePos(myX, myY+1)
+	self:grabBlock(_block)
 end
 
 function Hero:grabLeft()
-	local _block = getBlockAtTilePos(getObjectTileX(self)-1, getObjectTileY(self))
-	if _block then
-		self.heldObject = _block
-		_block:liftBlock()
-		self.state = "holding"
-	end
+	local myX = getObjectTileX(self)
+	local myY = getObjectTileY(self)
+
+	if myY <= 1 then return end
+
+	local _block = getBlockAtTilePos(myX-1, myY)
+	self:grabBlock(_block)
 end
 
 function Hero:grabRight()
-	local _block = getBlockAtTilePos(getObjectTileX(self)+1, getObjectTileY(self))
-	if _block then
-		self.heldObject = _block
-		_block:liftBlock()
-		self.state = "holding"
+	local myX = getObjectTileX(self)
+	local myY = getObjectTileY(self)
+
+	if myY <= 1 then return end
+
+	local _block = getBlockAtTilePos(myX+1, myY)
+	self:grabBlock(_block)
+end
+
+function Hero:grabBlock(_block)
+	if _block and _block.state ~= "matched" then
+	  self.heldObject = _block
+	  _block:liftBlock()
+	  self.state = "holding"
 	end
 end

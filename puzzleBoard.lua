@@ -54,7 +54,7 @@ end
 
 function PuzzleBoard:createBlocks()
 	offsetX = -20
-	offsetY = 0
+	offsetY = -20
 
 	for y=1, mapH do
 		for x=1, mapW do
@@ -131,23 +131,29 @@ end
 
 function PuzzleBoard:addRowOfBlocks()
 	offsetX = -20--mapX % tileW
-	offsetY = 0--mapY % tileH
+	offsetY = -20--mapY % tileH
 	for y=1, mapH do
 		for x=1, mapW do
 			local block = getBlockAtTilePos(x, y);
 			if block and y==1 then
 				gameManager.gameOver = true	
 			elseif block then
-				block.y = block.y - block.height
+				--block.y = block.y - block.height
 				map[y][x] = 0;	
-				map[y-1][x] = block.mapId;	
-				block.mapX = x
-				block.mapY = y-1
+				--map[y-1][x] = block.mapId;	
+				--block.mapX = x
+				--block.mapY = y-1
+				block.lerpX = block.x
+				block.lerpY = block.y - block.height
+				block.lerping = true
 			end
 		end
 	end
 	for x=1, mapW do
-		Block.create(((x-1)*tileW) - offsetX - (tileW/2), ((mapH-1)*tileH) - offsetY - (tileH/2), x, mapH)
+		local block = Block.create(((x-1)*tileW) - offsetX - (tileW/2), ((mapH)*tileH) - offsetY - (tileH/2), x, mapH)
+		block.lerpX = ((x-1)*tileW) - offsetX - (tileW/2)
+		block.lerpY = ((mapH-1)*tileH) - offsetY - (tileH/2)
+		block.lerping = true
 	end
 	self:logBoard()
 end

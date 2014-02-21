@@ -6,8 +6,24 @@ function size(list)
 	return amount
 end
 
+function getObjectTileLeftMostX(obj)
+	return math.floor(obj.x/getBoardWidth()*mapW) + 1
+end
+
+function getObjectTileRightMostX(obj)
+	return math.floor((obj.x+obj.width)/getBoardWidth()*mapW) + 1
+end
+
 function getObjectTileX(obj)
 	return math.floor((obj.x+obj.width/2)/getBoardWidth()*mapW) + 1
+end
+
+function getObjectTileTopMostY(obj)
+	return math.floor(obj.y/getBoardHeight()*mapH) + 1
+end
+
+function getObjectTileBottomMostY(obj)
+	return math.floor((obj.y+obj.height)/getBoardHeight()*mapH) + 1
 end
 
 function getObjectTileY(obj)
@@ -27,4 +43,11 @@ function getBlockAtTilePos(tX, tY)
 			return block
 		end
 	end
+end
+
+function lerp(start, finish, amount)
+  if start == finish then 
+    return start
+  end
+  return ((1 - amount) * start) + (amount * finish)
 end
