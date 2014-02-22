@@ -25,6 +25,9 @@ function PuzzleBoard:reset()
   for i in pairs(matches) do
     matches[i] = nil
   end
+  for i in pairs(particles) do
+    particles[i] = nil
+  end
 
   map = {
     {0,0,0,0,0,0,0,0,0,0},
@@ -149,11 +152,7 @@ function PuzzleBoard:addRowOfBlocks()
       if block and y==1 then
 	gameManager.gameOver = true	
       elseif block then
-	--block.y = block.y - block.height
 	map[y][x] = 0;	
-	--map[y-1][x] = block.mapId;	
-	--block.mapX = x
-	--block.mapY = y-1
 	block.lerpX = block.x
 	block.lerpY = block.y - block.height
 	block.lerping = true
