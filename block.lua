@@ -98,6 +98,7 @@ function Block:falling(dt)
 		puzzleBoard:checkForMatches()
 	else
 		for i, _block in ipairs(blocks) do
+		    if self.mapX == _block.mapX then
 			if not (self.mapX == _block.mapX and self.mapY == _block.mapY) then
 				if checkCollision(self.x, self.y, self.width, self.height, _block.x, _block.y, _block.width, _block.height) and _block.state == "idle" then
 					self.state = "idle"
@@ -110,6 +111,7 @@ function Block:falling(dt)
 					break
 				end
 			end
+		    end
 		end	
 	end
 

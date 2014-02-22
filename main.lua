@@ -5,8 +5,6 @@ require('block')
 require('gameManager')
 require('utils')
 
-blocks = {}
-hero = nil
 screen_shake = 0
 
 function love.load(args)
@@ -16,9 +14,7 @@ function love.load(args)
 end
 
 function love.update(dt)
-	if gameManager.paused or gameManager.gameOver then
-		return
-	end
+	if gameManager.paused then return end
 
 	if screen_shake > 0 then
 		screen_shake = screen_shake - dt
