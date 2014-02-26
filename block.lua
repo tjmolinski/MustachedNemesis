@@ -70,13 +70,17 @@ function Block:updateLerp(dt)
 end
 
 function Block:matched(dt)
+  self:makeParticles();
+  self:remove()
+end
+
+function Block:makeParticles()
   for i=0, 3 do
     for k=0, 3 do
       local particle = Particle.create(self.x+(i*10), self.y+(k*10), self.mapId)
       table.insert(particles, particle)
     end
   end
-  self:remove()
 end
 
 function Block:idle()
