@@ -11,7 +11,7 @@ function Block.create(newX, newY, mapX, mapY)
   setmetatable(self, Block)
   self.width = 40
   self.height = 40
-  self.fallSpeed = 200
+  self.fallSpeed = 600
   self.x = newX
   self.y = newY
   self.mapX = mapX
@@ -154,10 +154,10 @@ function Block:dropBlock()
   --NEED TO COMPENSATE FOR LERPING BLOCKS
   --EITHER BY FINDING WHERE THEY LERP TO
   --OR BY ADDING A LERP TO THEM
-  --self.y = hero.y - hero.height
-  --self.mapX = getObjectTileX(hero)
-  --self.mapY = getObjectTileY(hero)
-  --map[self.mapY][self.mapX] = 0--self.mapId
+  self.y = hero.y - hero.height
+  self.mapX = getObjectTileX(hero)
+  self.mapY = getObjectTileY(hero)
+  map[self.mapY][self.mapX] = 0--self.mapId
   hero.y = hero.y - self.height
 end
 
@@ -167,7 +167,7 @@ function Block:dropBlockLeft()
   self.y = hero.y - hero.height
   self.mapX = getObjectTileX(hero) - 1
   self.mapY = getObjectTileY(hero)
-  map[self.mapY][self.mapX] = self.mapId
+  map[self.mapY][self.mapX] = 0--self.mapId
 end
 
 function Block:dropBlockRight()
@@ -176,7 +176,7 @@ function Block:dropBlockRight()
   self.y = hero.y - hero.height
   self.mapX = getObjectTileX(hero) + 1
   self.mapY = getObjectTileY(hero)
-  map[self.mapY][self.mapX] = self.mapId
+  map[self.mapY][self.mapX] = 0--self.mapId
 end
 
 function Block:remove()

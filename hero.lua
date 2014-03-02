@@ -41,10 +41,12 @@ function Hero:reset()
 end
 
 function Hero:keyPressed(key, isRepeat)
-  if key == " " then
+  if key == ' ' then
     self:action()
-  elseif key == "up" then
+  elseif key == 'up' then
     self:jump()
+  elseif key == 'down' then
+    self:slam()
   end
 end
 
@@ -134,19 +136,22 @@ function Hero:handlePhysics(dt)
 end
 
 function Hero:handleInput(dt)
-  if love.keyboard.isDown("left") then
+  if love.keyboard.isDown('left') then
     self.vx = self.vx - (SPEED * dt)
     self.direction = -1
   end
-  if love.keyboard.isDown("right") then
+  if love.keyboard.isDown('right') then
     self.vx = self.vx + (SPEED * dt)
     self.direction = 1
   end
-  if love.keyboard.isDown("down") then
+  if love.keyboard.isDown('down') then
     self.direction = 0
-    if not self.onGround and not self.heldObject then
-      self.slamming = true
-    end
+  end
+end
+
+function Hero:slam()
+  if not self.onGround and not self.heldObject then
+    self.slamming = true
   end
 end
 
@@ -182,7 +187,8 @@ function Hero:drawHintReticule()
       posX = _block.x
       posY = _block.y - _block.height
     else
-      posX = (myX - 1 + self.direction) * tileW
+      --posX = (myX - 1 + self.direction) * tileW
+      posX = getPixelPositionX(myX + self.direction)
       posY = getBoardBottom() - tileH
     end
 
