@@ -33,13 +33,10 @@ function Particle:handlePhysics(dt)
   self.vs = self.vx * math.pow(PARTICLE_FRICTION, dt)
   self.vy = self.vy + (PARTICLE_GRAVITY * dt)
 
-  if self.y >= getBoardHeight() then
+  if self.y >= love.window.getHeight() then
     self:remove()
   end
   if self.x <= -PARTICLE_WIDTH then
-    self:remove()
-  end
-  if self.x >= getBoardWidth() then
     self:remove()
   end
 end

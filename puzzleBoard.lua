@@ -30,17 +30,17 @@ function PuzzleBoard:reset()
   end
 
   map = {
-    {0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0},
-    {1,1,1,1,1,1,1,1,1,1},
-    {1,1,1,1,1,1,1,1,1,1},
-    {1,1,1,1,1,1,1,1,1,1},
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0},
+    {1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1},
   }
 
   mapW = #map[1]
@@ -52,28 +52,33 @@ function PuzzleBoard:reset()
   mapDisplayW = mapW * tileW
   mapDisplayH = mapH * tileH
 
-  mapX = 0
-  mapY = 0--love.window.getHeight()-mapDisplayH
+  mapX = 20 --Compensating for the outline
+  mapY = love.window.getHeight() - mapDisplayH
 
   self:createBlocks()
 end
 
-function getBoardHeight()
+function getBoardTop()
+  return mapY
+end
+
+function getBoardBottom()
   return mapY + mapDisplayH
 end
 
-function getBoardWidth()
+function getBoardRight()
   return mapX + mapDisplayW
 end
 
-function PuzzleBoard:createBlocks()
-  offsetX = -20
-  offsetY = -20
+function getBoardLeft()
+  return mapX
+end
 
+function PuzzleBoard:createBlocks()
   for y=1, mapH do
     for x=1, mapW do
       if map[y][x] == 1 then
-	Block.create(((x-1)*tileW) - offsetX - (tileW/2), ((y-1)*tileH) - offsetY - tileH/2, x, y)
+	Block.create(getPixelPositionX(x), getPixelPositionY(y), x, y)
       end
     end
   end
@@ -104,7 +109,6 @@ end
 
 function PuzzleBoard:checkForMatches()
   if not self:fallingBlocks() then
-    --if self:dirtyBlocks() then
     for y=1, mapH do
       for x=1, mapW do
 	if map[y][x] > 0 then
@@ -121,31 +125,10 @@ function PuzzleBoard:checkForMatches()
 	end
       end
     end
-    --end 
   end
-end
-
-function PuzzleBoard:fallingBlocks()
-  for i, block in ipairs(blocks) do
-    if block.state ~= "idle" and block.state ~= "lifted" then
-      return true 
-    end
-  end
-  return false
-end
-
-function PuzzleBoard:dirtyBlocks()
-  for i, block in ipairs(blocks) do
-    if block.dirty then
-      return true 
-    end
-  end
-  return false
 end
 
 function PuzzleBoard:addRowOfBlocks()
-  offsetX = -20--mapX % tileW
-  offsetY = -20--mapY % tileH
   for y=1, mapH do
     for x=1, mapW do
       local block = getBlockAtTilePos(x, y);
@@ -159,18 +142,21 @@ function PuzzleBoard:addRowOfBlocks()
       end
     end
   end
+  local bottomY = getPixelPositionY(mapH)
   for x=1, mapW do
-    local block = Block.create(((x-1)*tileW) - offsetX - (tileW/2), ((mapH)*tileH) - offsetY - (tileH/2), x, mapH)
-    block.lerpX = ((x-1)*tileW) - offsetX - (tileW/2)
-    block.lerpY = ((mapH-1)*tileH) - offsetY - (tileH/2)
+    local bottomX = getPixelPositionX(x)
+    local block = Block.create(bottomX, bottomY+tileH, x, mapH)
+    block.lerpX = bottomX
+    block.lerpY = bottomY
     block.lerping = true
   end
-  self:logBoard()
 end
 
-function PuzzleBoard:logBoard()
-  for y=1, mapH do
-    print(map[y][1].." "..map[y][2].." "..map[y][3].." "..map[y][4].." "..map[y][5].." "..map[y][6].." "..map[y][7].." "..map[y][8].." "..map[y][9].." "..map[y][10])
+function PuzzleBoard:fallingBlocks()
+  for i, block in ipairs(blocks) do
+    if block.state == "falling" then
+      return true 
+    end
   end
-  print("=======================================")
+  return false
 end

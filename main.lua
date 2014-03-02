@@ -47,6 +47,7 @@ function love.draw()
       gameManager:drawPaused()
     end
     hero:draw()
+    gameManager:drawUI()
     for i, block in ipairs(blocks) do
       block:draw()
     end

@@ -24,7 +24,7 @@ function GameManager.create()
 end
 
 function GameManager:init()
-  love.window.setMode(400, 440, {})
+  love.window.setMode(800, 600, {})
   love.graphics.setFont(love.graphics.newFont(20))
 end
 
@@ -67,6 +67,16 @@ function GameManager:keyPressed(key, isRepeat)
   if key == "p" then
     self.paused = not self.paused
   end
+end
+
+function GameManager:drawUI()
+  love.graphics.setColor(125,125,125)
+  love.graphics.setLineWidth(20)
+  love.graphics.rectangle("line", getBoardLeft()-10, mapY-10, mapDisplayW+20, mapDisplayH+20)
+
+  love.graphics.setColor(255,255,255)
+  love.graphics.print("Points:", 0, mapY-40)
+  love.graphics.print(padPoints(hero.points), getBoardRight()-60, mapY-40)
 end
 
 function GameManager.drawGameOver()

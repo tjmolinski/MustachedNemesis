@@ -11,7 +11,7 @@ function Block.create(newX, newY, mapX, mapY)
   setmetatable(self, Block)
   self.width = 40
   self.height = 40
-  self.fallSpeed = 600
+  self.fallSpeed = 200
   self.x = newX
   self.y = newY
   self.mapX = mapX
@@ -19,20 +19,15 @@ function Block.create(newX, newY, mapX, mapY)
   self.lerpX = -1
   self.lerpY = -1
   self.lerpingTime = 0
-  self.lerpingSpeed = 1.5
+  self.lerpingSpeed = 2.0
   self.lerping = false
-  self.dirty = false
   self.state = "idle"
   self.scale = 1
   self.destroySpeed = 1
-  self:getColor(love.math.random(1,5))
+  self.mapId = love.math.random(1,5)
   table.insert(blocks, self)
   map[self.mapY][self.mapX] = self.mapId
   return self
-end
-
-function Block:getColor(id)
-  self.mapId = id
 end
 
 function Block:update(dt)
@@ -57,7 +52,7 @@ function Block:updateLerp(dt)
   self.y = lerp(self.y, self.lerpY, self.lerpingTime)
   if self.lerpingTime >= 0.8 or (self.x == self.lerpX and self.y == self.lerpY) then
     self.x = self.lerpX
-    self.Y = self.lerpY
+    self.y = self.lerpY
     local tX = getObjectTileX(self)
     local tY = getObjectTileY(self)
     self.lerping = false
@@ -70,6 +65,7 @@ function Block:updateLerp(dt)
 end
 
 function Block:matched(dt)
+  hero.points = hero.points + 10
   self:makeParticles();
   self:remove()
 end
@@ -87,7 +83,7 @@ function Block:idle()
   local bx = self.mapX
   local by = self.mapY
   local _block = getBlockAtTilePos(bx, by+1)
-  if self.y < getBoardHeight() - self.height then
+  if by < mapH then
     if not _block then
       self.state = "falling"
       map[self.mapY][self.mapX] = 0
@@ -97,33 +93,29 @@ function Block:idle()
 end
 
 function Block:falling(dt)
-  if self.y >= getBoardHeight() - self.height then
-    self.y = getBoardHeight() - self.height
+  if self.y >= getBoardBottom() - self.height then
+    self.y = getBoardBottom() - self.height
     self.state = "idle"
     self.mapY = mapH
     map[self.mapY][self.mapX] = self.mapId
     puzzleBoard:checkForMatches()
   else
     for i, _block in ipairs(blocks) do
-      if self.mapX == _block.mapX then
-	if not (self.mapX == _block.mapX and self.mapY == _block.mapY) then
-	  if checkCollision(self.x, self.y, self.width, self.height, _block.x, _block.y, _block.width, _block.height) and _block.state == "idle" then
-	    self.state = "idle"
-	    self.dirty = false
-	    self.y = _block.y - self.height
-	    self.mapX = _block.mapX
-	    self.mapY = _block.mapY - 1
-	    map[self.mapY][self.mapX] = self.mapId
-	    puzzleBoard:checkForMatches()
-	    break
-	  end
+      if not (self == _block) then
+	if checkCollision(self.x, self.y, self.width, self.height, _block.x, _block.y, _block.width, _block.height) and _block.state == "idle" then
+	  self.state = "idle"
+	  self.y = _block.y - self.height
+	  self.mapX = _block.mapX
+	  self.mapY = _block.mapY - 1
+	  map[self.mapY][self.mapX] = self.mapId
+	  puzzleBoard:checkForMatches()
+	  break
 	end
       end
     end	
   end
 
   if self.state == "falling" then
-    self.dirty = true
     self.y = self.y + (self.fallSpeed * dt)
   end
 end
@@ -156,33 +148,34 @@ function Block:liftBlock()
 end
 
 function Block:dropBlock()
+  --NEED TO MOVE OUT THE 20 ITS THE OFFSET OF THE BOX
+  self.x = (getObjectTileX(hero)-1) * tileW + 20
   self.state = "falling"
-  self.x = (getObjectTileX(hero)-1) * tileW
-  self.y = hero.y - hero.height
-  self.mapX = getObjectTileX(hero)
-  self.mapY = getObjectTileY(hero)
-  self.dirty = true
-  map[self.mapY][self.mapX] = self.mapId
+  --NEED TO COMPENSATE FOR LERPING BLOCKS
+  --EITHER BY FINDING WHERE THEY LERP TO
+  --OR BY ADDING A LERP TO THEM
+  --self.y = hero.y - hero.height
+  --self.mapX = getObjectTileX(hero)
+  --self.mapY = getObjectTileY(hero)
+  --map[self.mapY][self.mapX] = 0--self.mapId
   hero.y = hero.y - self.height
 end
 
 function Block:dropBlockLeft()
+  self.x = (getObjectTileX(hero)-2) * tileW + 20
   self.state = "falling"
-  self.x = (getObjectTileX(hero)-2) * tileW
   self.y = hero.y - hero.height
   self.mapX = getObjectTileX(hero) - 1
   self.mapY = getObjectTileY(hero)
-  self.dirty = true
   map[self.mapY][self.mapX] = self.mapId
 end
 
 function Block:dropBlockRight()
+  self.x = (getObjectTileX(hero)) * tileW + 20
   self.state = "falling"
-  self.x = (getObjectTileX(hero)) * tileW
   self.y = hero.y - hero.height
   self.mapX = getObjectTileX(hero) + 1
   self.mapY = getObjectTileY(hero)
-  self.dirty = true
   map[self.mapY][self.mapX] = self.mapId
 end
 
