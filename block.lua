@@ -31,18 +31,42 @@ function Block.create(newX, newY, mapX, mapY)
 end
 
 function Block:update(dt)
-  if self.state == "falling" then
+  if self.lerping then
+    self:updateLerp(dt)
+    return
+  end
+  self:handleCollisions(dt)
+  if self.state == "idle" then
+    self:idle()
+  elseif self.state == "falling" then
     self:falling(dt)
   elseif self.state == "matched" then
     self:matched(dt)
-  elseif self.state == "idle" then
-    self:idle()
   elseif self.state == "lifted" then
     self:followAbove(hero)
   end
+end
 
-  if self.lerping then
-    self:updateLerp(dt)
+function Block:handleCollisions(dt)
+  for i, block in ipairs(blocks) do
+    if not (self.state == 'lifted' or block.state == 'lifted') then
+      if checkCollision(self.x, self.y, self.width, self.height, block.x, block.y, block.width, block.height) then
+	self:hitBlock(block)
+      end
+    end
+  end
+end
+
+function Block:hitBlock(block)
+  if self.y < block.y then
+    self.y = block.y - self.height
+    self.x = block.x
+    self.state = 'idle'
+    self.mapX = getObjectTileX(self)--block.mapX
+    self.mapY = getObjectTileY(self)--block.mapY - 1
+    map[self.mapY][self.mapX] = self.mapId
+    puzzleBoard:checkForMatches()
+    logBoard()
   end
 end
 
@@ -80,39 +104,31 @@ function Block:makeParticles()
 end
 
 function Block:idle()
-  local bx = self.mapX
-  local by = self.mapY
-  local _block = getBlockAtTilePos(bx, by+1)
-  if by < mapH then
-    if not _block then
-      self.state = "falling"
-      map[self.mapY][self.mapX] = 0
-      self.mapY = -1
+  if self.mapY+1 <= mapH then
+    local block = getBlockAtTilePos(self.mapX, self.mapY+1)
+    if not block then
+      map[self.mapX][self.mapY] = 0
+      self.mapX = 0
+      self.mapY = 0
+      self.state = 'falling'
     end
   end
 end
 
 function Block:falling(dt)
+  if self.mapX > 0 and self.mapY > 0 then
+    map[self.mapX][self.mapY] = 0
+    self.mapX = 0
+    self.mapY = 0
+  end
+
   if self.y >= getBoardBottom() - self.height then
     self.y = getBoardBottom() - self.height
     self.state = "idle"
+    self.mapX = getObjectTileX(self)
     self.mapY = mapH
     map[self.mapY][self.mapX] = self.mapId
     puzzleBoard:checkForMatches()
-  else
-    for i, _block in ipairs(blocks) do
-      if not (self == _block) then
-	if checkCollision(self.x, self.y, self.width, self.height, _block.x, _block.y, _block.width, _block.height) and _block.state == "idle" then
-	  self.state = "idle"
-	  self.y = _block.y - self.height
-	  self.mapX = _block.mapX
-	  self.mapY = _block.mapY - 1
-	  map[self.mapY][self.mapX] = self.mapId
-	  puzzleBoard:checkForMatches()
-	  break
-	end
-      end
-    end	
   end
 
   if self.state == "falling" then
@@ -148,41 +164,28 @@ function Block:liftBlock()
 end
 
 function Block:dropBlock()
-  --NEED TO MOVE OUT THE 20 ITS THE OFFSET OF THE BOX
-  self.x = (getObjectTileX(hero)-1) * tileW + 20
   self.state = "falling"
-  --NEED TO COMPENSATE FOR LERPING BLOCKS
-  --EITHER BY FINDING WHERE THEY LERP TO
-  --OR BY ADDING A LERP TO THEM
+  self.x = (getObjectTileX(hero)-1) * tileW + 20
   self.y = hero.y - hero.height
-  self.mapX = getObjectTileX(hero)
-  self.mapY = getObjectTileY(hero)
-  map[self.mapY][self.mapX] = 0--self.mapId
-  hero.y = hero.y - self.height
 end
 
 function Block:dropBlockLeft()
-  self.x = (getObjectTileX(hero)-2) * tileW + 20
   self.state = "falling"
+  self.x = (getObjectTileX(hero)-2) * tileW + 20
   self.y = hero.y - hero.height
-  self.mapX = getObjectTileX(hero) - 1
-  self.mapY = getObjectTileY(hero)
-  map[self.mapY][self.mapX] = 0--self.mapId
 end
 
 function Block:dropBlockRight()
-  self.x = (getObjectTileX(hero)) * tileW + 20
   self.state = "falling"
+  self.x = (getObjectTileX(hero)) * tileW + 20
   self.y = hero.y - hero.height
-  self.mapX = getObjectTileX(hero) + 1
-  self.mapY = getObjectTileY(hero)
-  map[self.mapY][self.mapX] = 0--self.mapId
 end
 
 function Block:remove()
   for i, block in ipairs(blocks) do
     if(block.mapX == self.mapX and block.mapY == self.mapY) then
-      map[block.mapY][block.mapX] = 0
+      print('remove at '..self.mapX.." "..self.mapY)
+      map[self.mapY][self.mapX] = 0
       table.remove(blocks, i)
     end
   end

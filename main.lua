@@ -22,12 +22,14 @@ function love.update(dt)
   end
 
   gameManager:update(dt)
-  hero:update(dt)
-  for i, block in ipairs(blocks) do
-    block:update(dt)
-  end
-  for i, particle in ipairs(particles) do
-    particle:update(dt)
+  if not gameManager.gameOver then
+    hero:update(dt)
+    for i, block in ipairs(blocks) do
+      block:update(dt)
+    end
+    for i, particle in ipairs(particles) do
+      particle:update(dt)
+    end
   end
 end
 

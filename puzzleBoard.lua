@@ -160,3 +160,10 @@ function PuzzleBoard:fallingBlocks()
   end
   return false
 end
+
+function logBoard()
+  for i=1, mapH do
+    print(map[i][1]..","..map[i][2]..","..map[i][3]..","..map[i][4]..","..map[i][5]..","..map[i][6]..","..map[i][7])
+  end
+  print('================================')
+end
