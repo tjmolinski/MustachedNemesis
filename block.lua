@@ -137,7 +137,7 @@ function Block:falling(dt)
 end
 
 function Block:followAbove(parent)
-  self.x = parent.x - (parent.width * 0.5)
+  self.x = parent.x
   self.y = parent.y - self.height
 end
 
@@ -165,19 +165,19 @@ end
 
 function Block:dropBlock()
   self.state = "falling"
-  self.x = (getObjectTileX(hero)-1) * tileW + 20
+  self.x = getPixelPositionX(getObjectTileX(hero))
   self.y = hero.y - hero.height
 end
 
 function Block:dropBlockLeft()
   self.state = "falling"
-  self.x = (getObjectTileX(hero)-2) * tileW + 20
+  self.x = getPixelPositionX(getObjectTileX(hero)-1)
   self.y = hero.y - hero.height
 end
 
 function Block:dropBlockRight()
   self.state = "falling"
-  self.x = (getObjectTileX(hero)) * tileW + 20
+  self.x = getPixelPositionX(getObjectTileX(hero)+1)
   self.y = hero.y - hero.height
 end
 

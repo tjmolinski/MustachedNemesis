@@ -10,11 +10,11 @@ SPEED = 700
 JUMP_POWER = -500
 FRICTION = 0.1
 AIR_FRICTION = 0.01
-GRAVITY = 280
+GRAVITY = 300
 SLAM_POWER = 100000
 PRE_SLAM_TIME = 0.25
-HERO_WIDTH = 20
-HERO_HEIGHT = 20
+HERO_WIDTH = 40
+HERO_HEIGHT = 40
 
 function Hero.create()
   local self = {}
@@ -103,6 +103,7 @@ function Hero:handlePhysics(dt)
   if self.jumping then
     self.vy = self.vy * math.pow(AIR_FRICTION, dt)
     if self.vy >= -50.0 then
+      self.vy = 0
       self.jumping = false
     end
   elseif not self.onGround then
@@ -112,6 +113,7 @@ function Hero:handlePhysics(dt)
   if self.y >= getBoardBottom() - HERO_HEIGHT then
     self.y = getBoardBottom() - HERO_HEIGHT
     self.jumping = false
+    self.onGround = true
   end
   if self.y <= getBoardTop() then
     self.y = getBoardTop()
@@ -156,7 +158,7 @@ function Hero:slam()
 end
 
 function Hero:jump()
-  if not self.jumping then
+  if not self.jumping and self.onGround then
     self.jumping = true
     self.vy = JUMP_POWER
   end
@@ -176,34 +178,55 @@ function Hero:draw()
 end
 
 function Hero:drawHintReticule()
+  local myX = getObjectTileX(self)
+  local myY = getObjectTileY(self)
   if self.state == "holding" then
-    local myX = getObjectTileX(self)
-    local myY = getObjectTileY(self)
-    local _block = self:getClosestBlockBelow(myX+self.direction, myY)
-    local posX
-    local posY
+    self:drawDropHint(myX, myY)
+  else
+    self:drawPickUpHint(myX, myY)
+  end
+end
 
-    if _block then
-      posX = _block.x
-      posY = _block.y - _block.height
-    else
-      --posX = (myX - 1 + self.direction) * tileW
-      posX = getPixelPositionX(myX + self.direction)
-      posY = getBoardBottom() - tileH
-    end
+function Hero:drawDropHint(myX, myY)
+  local _block = self:getClosestBlockBelow(myX+self.direction, myY)
+  local _sideBlock = getBlockAtTilePos(myX+self.direction, myY)
+  local posX
+  local posY
 
-    --Why does hero draw hint blocks...
-    if self.heldObject.mapId == 1 then
-      love.graphics.draw(blueGhostBlock, posX, posY)
-    elseif self.heldObject.mapId == 2 then
-      love.graphics.draw(greenGhostBlock, posX, posY)
-    elseif self.heldObject.mapId == 3 then
-      love.graphics.draw(purpleGhostBlock, posX, posY) 
-    elseif self.heldObject.mapId == 4 then
-      love.graphics.draw(redGhostBlock, posX, posY)
-    else
-      love.graphics.draw(yellowGhostBlock, posX, posY)
-    end
+  if _sideBlock then return end
+
+  if _block then
+    posX = _block.x
+    posY = _block.y - _block.height
+  else
+    posX = getPixelPositionX(myX + self.direction)
+    posY = getBoardBottom() - tileH
+  end
+
+  --Why does hero draw hint blocks...
+  if self.heldObject.mapId == 1 then
+    love.graphics.draw(blueGhostBlock, posX, posY)
+  elseif self.heldObject.mapId == 2 then
+    love.graphics.draw(greenGhostBlock, posX, posY)
+  elseif self.heldObject.mapId == 3 then
+    love.graphics.draw(purpleGhostBlock, posX, posY) 
+  elseif self.heldObject.mapId == 4 then
+    love.graphics.draw(redGhostBlock, posX, posY)
+  else
+    love.graphics.draw(yellowGhostBlock, posX, posY)
+  end
+end
+
+function Hero:drawPickUpHint(myX, myY)
+  local _block
+  if self.direction == 0 then
+    _block = getBlockAtTilePos(myX, myY+1)
+  else
+    _block = getBlockAtTilePos(myX+self.direction, myY)
+  end
+
+  if _block then
+    love.graphics.draw(hintReticule, _block.x, _block.y)
   end
 end
 
@@ -269,6 +292,7 @@ end
 function Hero:dropBelow()
   if self.heldObject then
     self.heldObject:dropBlock()
+    self.y = self.y - self.heldObject.height 
     self.heldObject = nil
     self.state = "idle"
   end

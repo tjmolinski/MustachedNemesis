@@ -23,13 +23,13 @@ function love.update(dt)
 
   gameManager:update(dt)
   if not gameManager.gameOver then
-    hero:update(dt)
     for i, block in ipairs(blocks) do
       block:update(dt)
     end
     for i, particle in ipairs(particles) do
       particle:update(dt)
     end
+    hero:update(dt)
   end
 end
 
@@ -48,7 +48,6 @@ function love.draw()
     if gameManager.paused then
       gameManager:drawPaused()
     end
-    hero:draw()
     gameManager:drawUI()
     for i, block in ipairs(blocks) do
       block:draw()
@@ -56,6 +55,7 @@ function love.draw()
     for i, particle in ipairs(particles) do
       particle:draw()
     end
+    hero:draw()
   end
 end
 

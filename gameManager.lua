@@ -14,6 +14,7 @@ blueBlock = love.graphics.newImage("gfx/block_blue.png")
 blueGhostBlock = love.graphics.newImage("gfx/block_blue_ghost.png")
 greenBlock = love.graphics.newImage("gfx/block_green.png")
 greenGhostBlock = love.graphics.newImage("gfx/block_green_ghost.png")
+hintReticule = love.graphics.newImage("gfx/hint_reticule.png")
 
 function GameManager.create()
   local self = {}
