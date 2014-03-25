@@ -1,7 +1,9 @@
 --puzzleBoard.lua
 require 'utils'
+require 'wallBlock'
 
 blocks = {}
+wallBlocks = {}
 tile = {}
 matches = {}
 
@@ -30,17 +32,19 @@ function PuzzleBoard:reset()
   end
 
   map = {
-    {0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0},
-    {1,1,1,1,1,1,1},
-    {1,1,1,1,1,1,1},
+    {9,9,9,9,9,9,9,9,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,0,0,9,9,9,9,9,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,1,1,1,1,1,1,1,9},
+    {9,1,1,1,1,1,1,1,9},
+    {9,9,9,9,9,9,9,9,9},
   }
 
   mapW = #map[1]
@@ -79,6 +83,8 @@ function PuzzleBoard:createBlocks()
     for x=1, mapW do
       if map[y][x] == 1 then
 	Block.create(getPixelPositionX(x), getPixelPositionY(y), x, y)
+      elseif map[y][x] == 9 then
+	WallBlock.create(getPixelPositionX(x), getPixelPositionY(y), x, y)
       end
     end
   end

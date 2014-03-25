@@ -52,6 +52,9 @@ function love.draw()
     for i, block in ipairs(blocks) do
       block:draw()
     end
+    for i, wallBlock in ipairs(wallBlocks) do
+      wallBlock:draw()
+    end
     for i, particle in ipairs(particles) do
       particle:draw()
     end

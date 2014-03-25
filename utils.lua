@@ -54,6 +54,18 @@ function getObjectTileY(obj)
   return math.floor((((obj.y+(obj.height/2))-mapY)/tileH)+1)
 end
 
+function getCorners(x, y, ob)
+  local downY = getObjectTileBottomMostY(ob)
+  local upY = getObjectTileTopMostY(ob)
+  local leftX = getObjectTileLeftMostX(ob)
+  local rightX = getObjectTileRightMostX(ob)
+
+  ob.upleft = map[upY][leftX] == 0
+  ob.downleft = map[downY][leftX] == 0
+  ob.upright = map[upY][rightX] == 0
+  ob.downright = map[downY][rightX] == 0
+end
+
 function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
   return x1 < x2 + w2 and
   x2 < x1 + w1 and

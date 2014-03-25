@@ -38,6 +38,10 @@ function Hero:reset()
   self.height = HERO_HEIGHT
   self.width = HERO_WIDTH
   self.points = 0
+  self.upLeft = -1
+  self.downLeft = -1
+  self.upRight = -1
+  self.downRight = -1
 end
 
 function Hero:keyPressed(key, isRepeat)
@@ -165,8 +169,42 @@ function Hero:jump()
 end
 
 function Hero:move(dx, dy)
-  self.x = self.x + dx
-  self.y = self.y + dy
+  getCorners(self.x, self.y+dy, self)
+  local myX = getObjectTileX(self)
+  local myY = getObjectTileY(self)
+  --FIX: Shit is still wonky
+  if dy < 0 then
+    if self.upleft and self.upright then
+      self.y = self.y + dy
+    else
+      self.y = (myY*tileH)+self.height
+      self.vy = 0
+    end
+  end
+  if dy > 0 then
+    if self.downleft and self.downright then
+      self.y = self.y + dy
+    else
+      self.y = ((myY+1)*tileH)-self.height
+      self.vy = 0
+    end
+  end
+
+  getCorners(self.x+dx, self.y, self)
+  if dx > 0 then
+    if self.downleft and self.upleft then
+      self.x = self.x + dx
+    else
+      self.y = (myX*tileW)+self.width
+    end
+  end
+  if dx < 0 then
+    if self.upright and self.downright then
+      self.x = self.x + dx
+    else
+      self.y = ((myX+1)*tileW)+self.width
+    end
+  end
 end
 
 function Hero:draw()
@@ -284,7 +322,7 @@ end
 function Hero:handleCollisions(dt)
   for i, block in ipairs(blocks) do
     if checkCollision(self.x, self.y, HERO_WIDTH, HERO_HEIGHT, block.x, block.y, block.width, block.height) then
-      self:hitBlock(block)
+      --self:hitBlock(block)
     end
   end
 end
