@@ -14,8 +14,6 @@ function padPoints(val)
   elseif val < 1000 then
     return "000"..val
   elseif val < 10000 then
-    return "00"..val
-  elseif val < 100000 then
     return "0"..val
   else
     return val
@@ -35,7 +33,7 @@ function getObjectTileLeftMostX(obj)
 end
 
 function getObjectTileRightMostX(obj)
-  return math.floor((((obj.x+obj.width+1)-mapX)/tileW)+1)
+  return math.ceil(((obj.x+obj.width)-mapX)/tileW)
 end
 
 function getObjectTileX(obj)
@@ -47,7 +45,7 @@ function getObjectTileTopMostY(obj)
 end
 
 function getObjectTileBottomMostY(obj)
-  return math.floor((((obj.y+obj.height-1)-mapY)/tileH)+1)
+  return math.ceil(((obj.y+obj.height)-mapY)/tileH)
 end
 
 function getObjectTileY(obj)
