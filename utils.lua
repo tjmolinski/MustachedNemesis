@@ -35,7 +35,7 @@ function getObjectTileLeftMostX(obj)
 end
 
 function getObjectTileRightMostX(obj)
-  return math.floor((((obj.x+obj.width)-mapX)/tileW)+1)
+  return math.floor((((obj.x+obj.width+1)-mapX)/tileW)+1)
 end
 
 function getObjectTileX(obj)
@@ -47,7 +47,7 @@ function getObjectTileTopMostY(obj)
 end
 
 function getObjectTileBottomMostY(obj)
-  return math.floor((((obj.y+obj.height)-mapY)/tileH)+1)
+  return math.floor((((obj.y+obj.height-1)-mapY)/tileH)+1)
 end
 
 function getObjectTileY(obj)
@@ -55,10 +55,13 @@ function getObjectTileY(obj)
 end
 
 function getCorners(x, y, ob)
-  local downY = getObjectTileBottomMostY(ob)
-  local upY = getObjectTileTopMostY(ob)
-  local leftX = getObjectTileLeftMostX(ob)
-  local rightX = getObjectTileRightMostX(ob)
+  local obj = ob
+  obj.x = x
+  obj.y = y
+  local downY = getObjectTileBottomMostY(obj)
+  local upY = getObjectTileTopMostY(obj)
+  local leftX = getObjectTileLeftMostX(obj)
+  local rightX = getObjectTileRightMostX(obj)
 
   ob.upleft = map[upY][leftX] == 0
   ob.downleft = map[downY][leftX] == 0

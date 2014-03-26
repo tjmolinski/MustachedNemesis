@@ -39,7 +39,7 @@ function PuzzleBoard:reset()
     {9,0,0,0,0,0,0,0,9},
     {9,0,0,0,0,0,0,0,9},
     {9,0,0,0,0,0,0,0,9},
-    {9,0,0,9,9,9,9,9,9},
+    {9,9,9,9,9,9,9,9,9},
     {9,0,0,0,0,0,0,0,9},
     {9,0,0,0,0,0,0,0,9},
     {9,1,1,1,1,1,1,1,9},
@@ -56,7 +56,7 @@ function PuzzleBoard:reset()
   mapDisplayW = mapW * tileW
   mapDisplayH = mapH * tileH
 
-  mapX = 20 --Compensating for the outline
+  mapX = 0
   mapY = love.window.getHeight() - mapDisplayH
 
   self:createBlocks()

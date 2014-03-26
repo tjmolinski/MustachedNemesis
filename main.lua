@@ -50,7 +50,7 @@ function love.draw()
     end
     gameManager:drawUI()
     for i, block in ipairs(blocks) do
-      block:draw()
+      --block:draw()
     end
     for i, wallBlock in ipairs(wallBlocks) do
       wallBlock:draw()

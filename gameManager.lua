@@ -59,7 +59,7 @@ function GameManager:updateGamePlay(dt)
     self.elapsedTime = self.elapsedTime + dt
     if self.growBuffer > self.growTime then
       self.growBuffer = 0
-      puzzleBoard:addRowOfBlocks()
+      --puzzleBoard:addRowOfBlocks()
     else
       self.growBuffer = self.growBuffer + dt
     end
@@ -72,10 +72,6 @@ function GameManager:keyPressed(key, isRepeat)
 end
 
 function GameManager:drawUI()
-  love.graphics.setColor(125,125,125)
-  love.graphics.setLineWidth(20)
-  love.graphics.rectangle("line", getBoardLeft()-10, mapY-10, mapDisplayW+20, mapDisplayH+20)
-
   love.graphics.setColor(255,255,255)
   love.graphics.print("Points:", 0, mapY-40)
   love.graphics.print(padPoints(hero.points), getBoardRight()-60, mapY-40)

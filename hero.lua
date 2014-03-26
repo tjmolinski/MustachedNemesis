@@ -6,7 +6,7 @@ require 'block'
 Hero = {}
 Hero.__index = Hero
 
-SPEED = 700
+SPEED = 70
 JUMP_POWER = -500
 FRICTION = 0.1
 AIR_FRICTION = 0.01
@@ -100,36 +100,36 @@ function Hero:handleSlam(dt)
 end
 
 function Hero:handlePhysics(dt)
-  self:move(self.vx * dt, self.vy * dt)
+  --self:move(self.vx * dt, self.vy * dt)
 
-  self.vx = self.vx * math.pow(FRICTION, dt)
+  --self.vx = self.vx * math.pow(FRICTION, dt)
 
-  if self.jumping then
-    self.vy = self.vy * math.pow(AIR_FRICTION, dt)
-    if self.vy >= -50.0 then
-      self.vy = 0
-      self.jumping = false
-    end
-  elseif not self.onGround then
-    self.vy = self.vy + (GRAVITY * dt)
-  end
+  --if self.jumping then
+  --  self.vy = self.vy * math.pow(AIR_FRICTION, dt)
+  --  if self.vy >= -50.0 then
+  --    self.vy = 0
+  --    self.jumping = false
+  --  end
+  --elseif not self.onGround then
+  --  self.vy = self.vy + (GRAVITY * dt)
+  --end
 
-  if self.y >= getBoardBottom() - HERO_HEIGHT then
-    self.y = getBoardBottom() - HERO_HEIGHT
-    self.jumping = false
-    self.onGround = true
-  end
-  if self.y <= getBoardTop() then
-    self.y = getBoardTop()
-  end
-  if self.x <= getBoardLeft() then
-    self.x = getBoardLeft()
-    self.vx = 0
-  end
-  if self.x >= getBoardRight() - HERO_WIDTH then
-    self.x = getBoardRight() - HERO_WIDTH
-    self.vx = 0
-  end
+  --if self.y >= getBoardBottom() - HERO_HEIGHT then
+  --  self.y = getBoardBottom() - HERO_HEIGHT
+  --  self.jumping = false
+  --  self.onGround = true
+  --end
+  --if self.y <= getBoardTop() then
+  --  self.y = getBoardTop()
+  --end
+  --if self.x <= getBoardLeft() then
+  --  self.x = getBoardLeft()
+  --  self.vx = 0
+  --end
+  --if self.x >= getBoardRight() - HERO_WIDTH then
+  --  self.x = getBoardRight() - HERO_WIDTH
+  --  self.vx = 0
+  --end
   if self.state == "holding" then
     if self.y <= tileH then
       self.y = tileH
@@ -143,21 +143,30 @@ end
 
 function Hero:handleInput(dt)
   if love.keyboard.isDown('left') then
-    self.vx = self.vx - (SPEED * dt)
+    self:move(-SPEED * dt, 0)
+    --self.vx = self.vx - (SPEED * dt)
     self.direction = -1
   end
   if love.keyboard.isDown('right') then
-    self.vx = self.vx + (SPEED * dt)
+    self:move(SPEED * dt, 0)
+    --self.vx = self.vx + (SPEED * dt)
     self.direction = 1
   end
+  if love.keyboard.isDown('up') then
+    self:move(0, -SPEED * dt)
+    --self.vy = self.vy - (SPEED * dt)
+    self.direction = 0
+  end
   if love.keyboard.isDown('down') then
+    self:move(0, SPEED * dt)
+    --self.vy = self.vy + (SPEED * dt)
     self.direction = 0
   end
 end
 
 function Hero:slam()
   if not self.onGround and not self.heldObject then
-    self.slamming = true
+    --self.slamming = true
   end
 end
 
@@ -169,40 +178,43 @@ function Hero:jump()
 end
 
 function Hero:move(dx, dy)
-  getCorners(self.x, self.y+dy, self)
-  local myX = getObjectTileX(self)
   local myY = getObjectTileY(self)
+
   --FIX: Shit is still wonky
+  getCorners(self.x, self.y+dy, self)
   if dy < 0 then
     if self.upleft and self.upright then
       self.y = self.y + dy
     else
-      self.y = (myY*tileH)+self.height
-      self.vy = 0
+      print('hit top')
+      self.y = getPixelPositionY(myY)
     end
   end
   if dy > 0 then
     if self.downleft and self.downright then
       self.y = self.y + dy
     else
-      self.y = ((myY+1)*tileH)-self.height
-      self.vy = 0
+      print('hit bottom')
+      self.y = getPixelPositionY(myY)
     end
   end
 
+  local myX = getObjectTileX(self)
   getCorners(self.x+dx, self.y, self)
-  if dx > 0 then
+  if dx < 0 then
     if self.downleft and self.upleft then
       self.x = self.x + dx
     else
-      self.y = (myX*tileW)+self.width
+      print('hit left')
+      self.x = getPixelPositionX(myX)
     end
   end
-  if dx < 0 then
+  if dx > 0 then
     if self.upright and self.downright then
       self.x = self.x + dx
     else
-      self.y = ((myX+1)*tileW)+self.width
+      print('hit right')
+      self.x = getPixelPositionX(myX)
     end
   end
 end
