@@ -33,7 +33,7 @@ function getObjectTileLeftMostX(obj)
 end
 
 function getObjectTileRightMostX(obj)
-  return math.ceil(((obj.x+obj.width)-mapX)/tileW)
+  return math.ceil(((obj.x+obj.width-1)-mapX)/tileW)
 end
 
 function getObjectTileX(obj)
@@ -45,7 +45,7 @@ function getObjectTileTopMostY(obj)
 end
 
 function getObjectTileBottomMostY(obj)
-  return math.ceil(((obj.y+obj.height)-mapY)/tileH)
+  return math.ceil(((obj.y+obj.height-1)-mapY)/tileH)
 end
 
 function getObjectTileY(obj)
@@ -53,9 +53,7 @@ function getObjectTileY(obj)
 end
 
 function getCorners(x, y, ob)
-  local obj = ob
-  obj.x = x
-  obj.y = y
+  local obj = {x = x, y = y, width = ob.width, height = ob.height}
   local downY = getObjectTileBottomMostY(obj)
   local upY = getObjectTileTopMostY(obj)
   local leftX = getObjectTileLeftMostX(obj)

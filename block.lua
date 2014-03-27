@@ -6,6 +6,8 @@ require 'particle'
 Block = {}
 Block.__index = Block
 
+GRAVITY = 300
+
 function Block.create(newX, newY, mapX, mapY)
   local self = {}
   setmetatable(self, Block)
@@ -14,8 +16,11 @@ function Block.create(newX, newY, mapX, mapY)
   self.fallSpeed = 600
   self.x = newX
   self.y = newY
+  self.vx = 0
+  self.vy = 0
   self.mapX = mapX
   self.mapY = mapY
+  self.onGround = false
   self.lerpX = -1
   self.lerpY = -1
   self.lerpingTime = 0
@@ -25,49 +30,81 @@ function Block.create(newX, newY, mapX, mapY)
   self.scale = 1
   self.destroySpeed = 1
   self.mapId = love.math.random(1,5)
+  self.upLeft = -1
+  self.downLeft = -1
+  self.upRight = -1
+  self.downRight = -1
   table.insert(blocks, self)
   map[self.mapY][self.mapX] = self.mapId
   return self
 end
 
 function Block:update(dt)
-  if self.lerping then
-    self:updateLerp(dt)
-    return
-  end
-  self:handleCollisions(dt)
-  if self.state == "idle" then
-    self:idle()
-  elseif self.state == "falling" then
-    self:falling(dt)
-  elseif self.state == "matched" then
-    self:matched(dt)
-  elseif self.state == "lifted" then
-    self:followAbove(hero)
+  self:handlePhysics(dt)
+  --if self.lerping then
+  --  self:updateLerp(dt)
+  --  return
+  --end
+  --self:handleCollisions(dt)
+  --if self.state == "idle" then
+  --  self:idle()
+  --elseif self.state == "falling" then
+  --  self:falling(dt)
+  --elseif self.state == "matched" then
+  --  self:matched(dt)
+  --elseif self.state == "lifted" then
+  --  self:followAbove(hero)
+  --end
+end
+
+function Block:handlePhysics(dt)
+  self:move(self.vx * dt, self.vy * dt)
+  
+  if not self.onGround then
+    --self.vy = self.vy + (GRAVITY * dt)
+    self.vy = 100
   end
 end
 
-function Block:handleCollisions(dt)
-  for i, block in ipairs(blocks) do
-    if not (self.state == 'lifted' or block.state == 'lifted') then
-      if checkCollision(self.x, self.y, self.width, self.height, block.x, block.y, block.width, block.height) then
-	self:hitBlock(block)
-      end
+function Block:move(dx, dy)
+  local myY = getObjectTileY(self)
+  local myX = getObjectTileX(self)
+
+  getCorners(self.x, self.y+dy, self)
+  --if dy < 0 then
+  --  if self.upleft and self.upright then
+  --    self.y = self.y + dy 
+  --  else
+  --    self.y = getPixelPositionY(myY)
+  --    self.vy = 0;
+  --  end
+  --end
+  if dy > 0 then
+    if self.downleft and self.downright then
+      map[myY][myX] = 0
+      self.y = self.y + dy
+    else
+      self.y = getPixelPositionY(myY)
+      self.vy = 0;
+      self:hitSomethingBelow(myX, myY)
     end
   end
 end
 
+function Block:hitSomethingBelow(myX, myY)
+  self.onGround = true
+
+  local objBelow = getBlockAtTilePos(myX, myY+1)
+  if objBelow then
+    self:hitBlock(block)
+  end
+end
+
 function Block:hitBlock(block)
-  if self.y < block.y then
-    self.y = block.y - self.height
-    self.x = block.x
-    self.state = 'idle'
-    self.mapX = getObjectTileX(self)--block.mapX
-    self.mapY = getObjectTileY(self)--block.mapY - 1
+    self.mapX = getObjectTileX(self)
+    self.mapY = getObjectTileY(self)
     map[self.mapY][self.mapX] = self.mapId
     puzzleBoard:checkForMatches()
-    logBoard()
-  end
 end
 
 function Block:updateLerp(dt)
