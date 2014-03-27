@@ -59,7 +59,7 @@ function GameManager:updateGamePlay(dt)
     self.elapsedTime = self.elapsedTime + dt
     if self.growBuffer > self.growTime then
       self.growBuffer = 0
-      --puzzleBoard:addRowOfBlocks()
+      puzzleBoard:addRowOfBlocks()
     else
       self.growBuffer = self.growBuffer + dt
     end

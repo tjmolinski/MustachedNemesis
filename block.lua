@@ -40,11 +40,11 @@ function Block.create(newX, newY, mapX, mapY)
 end
 
 function Block:update(dt)
+  if self.lerping then
+    self:updateLerp(dt)
+    return
+  end
   self:handlePhysics(dt)
-  --if self.lerping then
-  --  self:updateLerp(dt)
-  --  return
-  --end
   --self:handleCollisions(dt)
   --if self.state == "idle" then
   --  self:idle()
@@ -71,14 +71,6 @@ function Block:move(dx, dy)
   local myX = getObjectTileX(self)
 
   getCorners(self.x, self.y+dy, self)
-  --if dy < 0 then
-  --  if self.upleft and self.upright then
-  --    self.y = self.y + dy 
-  --  else
-  --    self.y = getPixelPositionY(myY)
-  --    self.vy = 0;
-  --  end
-  --end
   if dy > 0 then
     if self.downleft and self.downright then
       map[myY][myX] = 0

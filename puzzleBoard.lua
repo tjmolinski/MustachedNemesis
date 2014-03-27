@@ -148,10 +148,10 @@ function PuzzleBoard:addRowOfBlocks()
       end
     end
   end
-  local bottomY = getPixelPositionY(mapH)
+  local bottomY = getPixelPositionY(mapH-1)
   for x=1, mapW do
     local bottomX = getPixelPositionX(x)
-    local block = Block.create(bottomX, bottomY+tileH, x, mapH)
+    local block = Block.create(bottomX, bottomY+tileH, x, mapH-1)
     block.lerpX = bottomX
     block.lerpY = bottomY
     block.lerping = true
