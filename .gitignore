@@ -3,3 +3,4 @@
 *.love
 *.exe
 /bin
+*.DS_STORE
