@@ -4,3 +4,4 @@
 *.exe
 /bin
 *.DS_STORE
+*.swp

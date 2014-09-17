@@ -46,15 +46,29 @@ function Block:update(dt)
   end
   self:handlePhysics(dt)
   --self:handleCollisions(dt)
-  --if self.state == "idle" then
-  --  self:idle()
-  --elseif self.state == "falling" then
-  --  self:falling(dt)
+  if self.state == "idle" then
+    --self:idle()
+  elseif self.state == "falling" then
+    self:falling(dt)
   --elseif self.state == "matched" then
-  --  self:matched(dt)
-  --elseif self.state == "lifted" then
-  --  self:followAbove(hero)
-  --end
+   -- self:matched(dt)
+  elseif self.state == "lifted" then
+    self:followAbove(hero)
+  end
+end
+
+--TODO: TJM
+--This needs to work... as of right now the blocks will fall
+--right past all the other blocks. We only need to make checks
+--against blocks in the y axis.
+function Block:handleCollisions(dt)
+  for i, block in ipairs(blocks) do
+  	if not (self.state == 'lifted' or block.state == 'lifted') then
+		  if checkCollision(self.x, self.y, self.width, self.height, block.x, block.y, block.width, block.height) then
+			  self:hitBlock(block)
+			end
+		end
+	end
 end
 
 function Block:handlePhysics(dt)

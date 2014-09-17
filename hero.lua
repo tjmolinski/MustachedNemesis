@@ -251,6 +251,10 @@ function Hero:hitSomethingBelow(myX, myY)
   self.slamBuffer = 0
   self.onGround = true
 
+	--TODO: TJM
+	--Need to remove block checking and check pixel positions
+	--and corners against other objects. Could contain this to
+	--the same x value and just compare y values
   local objBelow = getBlockAtTilePos(myX, myY+1)
   if objBelow then
     self:hitBlock(objBelow)
