@@ -2,6 +2,7 @@
 require 'utils'
 require 'puzzleBoard'
 require 'block'
+require 'vector2'
 
 Hero = {}
 Hero.__index = Hero
@@ -25,7 +26,7 @@ end
 
 function Hero:reset()
   self.x = 200
-  self.y = 250
+  self.y = 400
   self.vx = 0
   self.vy = 0
   self.direction = 0
@@ -81,7 +82,6 @@ end
 
 function Hero:handlePhysics(dt)
   self:move(self.vx * dt, self.vy * dt)
-
   self.vx = self.vx * math.pow(FRICTION, dt)
 
   if self.jumping then
@@ -89,6 +89,7 @@ function Hero:handlePhysics(dt)
     if self.vy >= -50.0 then
       self.vy = 0
       self.jumping = false
+      self.onGround = false
     end
   elseif not self.onGround then
     self.vy = self.vy + (GRAVITY * dt)
@@ -127,48 +128,66 @@ function Hero:jump()
     self.jumping = true
     self.vy = JUMP_POWER
     self.onGround = false
+    print('jump')
   end
 end
 
 function Hero:move(dx, dy)
+  for i, block in ipairs(blocks) do
+    if checkCollision(self.x, self.y, self.width, self.height, block.x, block.y, block.width, block.height) then
+      local heroCenter = Vector2.create(hero.x+(hero.width*0.5), hero.y+(hero.height*0.5))
+      local blockCenter = Vector2.create(block.x+(block.width*0.5), block.y+(block.height*0.5))
+      local diff = Vector2.create(0,0)
+      diff:add(blockCenter)
+      diff:sub(heroCenter)
+      diff:normalize()
+      if diff.y > 0.71 and self.vy > 0 then
+	self.y = block.y - self.height
+	self.vy = 0;
+	dy = 0;
+	self.onGround = true
+      elseif diff.y < -0.71 and self.vy < 0 then	
+	self.y = block.y + block.height 
+	self.vy = 0;
+	dy = 0;
+      end
+      if diff.x > 0.71 and self.vx > 0 then
+        self.x = block.x - self.width
+        self.vx = 0;
+        dx = 0;
+      elseif diff.x < -0.71 and self.vx < 0 then
+        self.x = block.x + block.width
+        self.vx = 0;
+        dx = 0;
+      end
+    end
+  end
+  self.x = self.x + dx
+  self.y = self.y + dy
+  local myLeftX = getObjectTileLeftMostX(self)
+  local myRightX = getObjectTileRightMostX(self)
   local myY = getObjectTileY(self)
-  local myX = getObjectTileX(self)
-
-  getCorners(self.x, self.y+dy, self)
-  if dy < 0 then
-    if self.upleft and self.upright then
-      self.y = self.y + dy
-    else
-      self.y = getPixelPositionY(myY)
-      self.vy = 0;
-    end
-  end
-  if dy > 0 then
-    if self.downleft and self.downright then
-      self.y = self.y + dy
-    else
-      self.y = getPixelPositionY(myY)
-      self.vy = 0;
-      self:hitSomethingBelow(myX, myY)
+  local lBlock = getBlockAtTilePos(myLeftX, myY+1)
+  local rBlock = getBlockAtTilePos(myRightX, myY+1)
+  if not (myY+1 >= mapH) then
+    if not lBlock and not rBlock then
+      self.onGround = false
     end
   end
 
-  getCorners(self.x+dx, self.y, self)
-  if dx < 0 then
-    if self.downleft and self.upleft then
-      self.x = self.x + dx
-    else
-      self.x = getPixelPositionX(myX)
-      self.vx = 0;
-    end
+  if self.y > getBoardBottom() - hero.height then
+    self.y = getBoardBottom() - hero.height
+    self.vy = 0
+    self.onGround = true
   end
-  if dx > 0 then
-    if self.upright and self.downright then
-      self.x = self.x + dx
-    else
-      self.x = getPixelPositionX(myX)
-      self.vx = 0;
-    end
+
+  if self.x > getBoardRight() - tileW then
+    self.x = getBoardRight() - self.width
+    self.vx = 0
+  end
+  if self.x < tileW then
+    self.x = tileW
+    self.vx = 0
   end
 end
 
@@ -192,11 +211,8 @@ end
 
 function Hero:drawDropHint(myX, myY)
   local _block = self:getClosestBlockBelow(myX+self.direction, myY)
-  local _sideBlock = getBlockAtTilePos(myX+self.direction, myY)
   local posX
   local posY
-
-  if _sideBlock then return end
 
   if _block then
     posX = _block.x
@@ -205,6 +221,11 @@ function Hero:drawDropHint(myX, myY)
     posX = getPixelPositionX(myX + self.direction)
     posY = getBoardBottom() - tileH
   end
+
+  if myX+self.direction < 2 or (myX+self.direction > mapW-1) then
+    return
+  end
+
 
   --Why does hero draw hint blocks...
   if self.heldObject.mapId == 1 then
@@ -251,10 +272,10 @@ function Hero:hitSomethingBelow(myX, myY)
   self.slamBuffer = 0
   self.onGround = true
 
-	--TODO: TJM
-	--Need to remove block checking and check pixel positions
-	--and corners against other objects. Could contain this to
-	--the same x value and just compare y values
+  --TODO: TJM
+  --Need to remove block checking and check pixel positions
+  --and corners against other objects. Could contain this to
+  --the same x value and just compare y values
   local objBelow = getBlockAtTilePos(myX, myY+1)
   if objBelow then
     self:hitBlock(objBelow)
@@ -307,7 +328,7 @@ end
 
 function Hero:dropRight()
   local _block = getBlockAtTilePos(getObjectTileX(self)+1, getObjectTileY(self))
-  if (not _block) and self.heldObject and getObjectTileX(self) + 1 <= mapW then
+  if (not _block) and self.heldObject and getObjectTileX(self) + 1 < mapW then
     self.heldObject:dropBlockRight()
     self.heldObject = nil
     self.state = "idle"
@@ -316,7 +337,7 @@ end
 
 function Hero:dropLeft()
   local _block = getBlockAtTilePos(getObjectTileX(self)-1, getObjectTileY(self))
-  if (not _block) and self.heldObject and getObjectTileX(self) - 1 > 0 then
+  if (not _block) and self.heldObject and getObjectTileX(self) - 1 > 1 then
     self.heldObject:dropBlockLeft()
     self.heldObject = nil
     self.state = "idle"

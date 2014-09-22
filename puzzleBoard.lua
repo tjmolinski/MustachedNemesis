@@ -34,16 +34,16 @@ function PuzzleBoard:reset()
   map = {
     {9,9,9,9,9,9,9,9,9},
     {9,0,0,0,0,0,0,0,9},
-    {9,0,0,0,0,0,0,1,9},
-    {9,0,0,0,0,0,0,0,9},
-    {9,1,0,0,0,0,0,0,9},
-    {9,0,0,0,0,0,1,0,9},
     {9,0,0,0,0,0,0,0,9},
     {9,0,0,0,0,0,0,0,9},
-    {9,0,1,0,0,0,0,0,9},
     {9,0,0,0,0,0,0,0,9},
-    {9,1,1,1,1,1,1,1,9},
-    {9,1,1,1,1,1,1,1,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,0,0,0,0,0,0,0,9},
+    {9,0,0,1,0,0,0,1,9},
+    {9,0,0,1,1,1,1,1,9},
+    {9,0,1,1,1,1,1,1,9},
     {9,9,9,9,9,9,9,9,9},
   }
 
@@ -63,19 +63,19 @@ function PuzzleBoard:reset()
 end
 
 function getBoardTop()
-  return mapY
+  return mapY + tileH
 end
 
 function getBoardBottom()
-  return mapY + mapDisplayH
+  return mapY + mapDisplayH - tileH
 end
 
 function getBoardRight()
-  return mapX + mapDisplayW
+  return mapX + mapDisplayW - tileW
 end
 
 function getBoardLeft()
-  return mapX
+  return mapX + tileW
 end
 
 function PuzzleBoard:createBlocks()
@@ -167,9 +167,9 @@ function PuzzleBoard:fallingBlocks()
   return false
 end
 
-function logBoard()
-  for i=1, mapH do
-    print(map[i][1]..","..map[i][2]..","..map[i][3]..","..map[i][4]..","..map[i][5]..","..map[i][6]..","..map[i][7])
+function PuzzleBoard:logBoard()
+  for i=2, mapH-1 do
+    print(map[i][2]..","..map[i][3]..","..map[i][4]..","..map[i][5]..","..map[i][6]..","..map[i][7]..","..map[i][8])
   end
   print('================================')
 end

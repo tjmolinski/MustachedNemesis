@@ -44,30 +44,68 @@ function Block:update(dt)
     self:updateLerp(dt)
     return
   end
-  self:handlePhysics(dt)
-  --self:handleCollisions(dt)
   if self.state == "idle" then
-    --self:idle()
+    self:idle()
   elseif self.state == "falling" then
     self:falling(dt)
-  --elseif self.state == "matched" then
-   -- self:matched(dt)
+  elseif self.state == "matched" then
+    self:matched(dt)
   elseif self.state == "lifted" then
     self:followAbove(hero)
   end
 end
 
---TODO: TJM
---This needs to work... as of right now the blocks will fall
---right past all the other blocks. We only need to make checks
---against blocks in the y axis.
+function Block:idle()
+  if self.mapY+1 < mapH then
+    local block = getBlockAtTilePos(self.mapX, self.mapY+1)
+    if not block then
+      map[self.mapX][self.mapY] = 0
+      self.mapX = -1
+      self.mapY = -1
+      self.state = 'falling'
+    end
+  end
+end
+
+function Block:falling(dt)
+  if self.mapX >= 0 and self.mapY >= 0 then
+    map[self.mapX][self.mapY] = 0
+    self.mapX = -1
+    self.mapY = -1
+  end
+
+  if self.y >= getBoardBottom() - self.height then
+    self.y = getBoardBottom() - self.height
+    self.state = 'idle'
+    self.mapX = getObjectTileX(self)
+    self.mapY = mapH - 1
+    map[self.mapY][self.mapX] = self.mapId
+    puzzleBoard:checkForMatches()
+  end
+
+  self:handleCollisions(dt)
+  
+  if self.state == 'falling' then
+    self.y = self.y + (self.fallSpeed * dt)
+  end
+end
+
 function Block:handleCollisions(dt)
   for i, block in ipairs(blocks) do
-  	if not (self.state == 'lifted' or block.state == 'lifted') then
-		  if checkCollision(self.x, self.y, self.width, self.height, block.x, block.y, block.width, block.height) then
-			  self:hitBlock(block)
-			end
-		end
+    if not (block.x == self.x and block.y == self.y) then
+      if not (self.state == 'lifted' or block.state == 'lifted') then
+        if checkCollision(self.x, self.y, self.width, self.height, block.x, block.y, block.width, block.height) then
+          self.mapX = block.mapX
+          self.mapY = block.mapY - 1
+          self.y = block.y - block.height
+          self.vy = 0;
+          self:hitBlock(block)
+          self.state = 'idle'
+          puzzleBoard:checkForMatches()
+          puzzleBoard:logBoard()
+        end
+      end
+    end
 	end
 end
 
@@ -146,39 +184,6 @@ function Block:makeParticles()
   end
 end
 
-function Block:idle()
-  if self.mapY+1 <= mapH then
-    local block = getBlockAtTilePos(self.mapX, self.mapY+1)
-    if not block then
-      map[self.mapX][self.mapY] = 0
-      self.mapX = 0
-      self.mapY = 0
-      self.state = 'falling'
-    end
-  end
-end
-
-function Block:falling(dt)
-  if self.mapX > 0 and self.mapY > 0 then
-    map[self.mapX][self.mapY] = 0
-    self.mapX = 0
-    self.mapY = 0
-  end
-
-  if self.y >= getBoardBottom() - self.height then
-    self.y = getBoardBottom() - self.height
-    self.state = "idle"
-    self.mapX = getObjectTileX(self)
-    self.mapY = mapH
-    map[self.mapY][self.mapX] = self.mapId
-    puzzleBoard:checkForMatches()
-  end
-
-  if self.state == "falling" then
-    self.y = self.y + (self.fallSpeed * dt)
-  end
-end
-
 function Block:followAbove(parent)
   self.x = parent.x
   self.y = parent.y - self.height
@@ -200,26 +205,26 @@ end
 
 function Block:liftBlock()
   self.lerping = false
-  self.state = "lifted"
+  self.state = 'lifted'
   map[self.mapY][self.mapX] = 0
-  self.mapY = 0
-  self.mapX = 0
+  self.mapY = -1
+  self.mapX = -1
 end
 
 function Block:dropBlock()
-  self.state = "falling"
+  self.state = 'falling'
   self.x = getPixelPositionX(getObjectTileX(hero))
   self.y = hero.y - hero.height
 end
 
 function Block:dropBlockLeft()
-  self.state = "falling"
+  self.state = 'falling'
   self.x = getPixelPositionX(getObjectTileX(hero)-1)
   self.y = hero.y - hero.height
 end
 
 function Block:dropBlockRight()
-  self.state = "falling"
+  self.state = 'falling'
   self.x = getPixelPositionX(getObjectTileX(hero)+1)
   self.y = hero.y - hero.height
 end
