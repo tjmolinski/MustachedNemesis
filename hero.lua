@@ -141,11 +141,12 @@ function Hero:move(dx, dy)
       diff:add(blockCenter)
       diff:sub(heroCenter)
       diff:normalize()
-      if diff.y > 0.71 and self.vy > 0 then
+      if diff.y > 0.51 and self.vy >= 0 then
 	self.y = block.y - self.height
 	self.vy = 0;
 	dy = 0;
 	self.onGround = true
+	self:hitSomethingBelow()
       elseif diff.y < -0.71 and self.vy < 0 then	
 	self.y = block.y + block.height 
 	self.vy = 0;
@@ -264,22 +265,13 @@ function Hero:getClosestBlockBelow(myX, myY)
   end	
 end
 
-function Hero:hitSomethingBelow(myX, myY)
+function Hero:hitSomethingBelow()
   if self.slamming then
     screen_shake = 0.1
   end
   self.slamming = false
   self.slamBuffer = 0
   self.onGround = true
-
-  --TODO: TJM
-  --Need to remove block checking and check pixel positions
-  --and corners against other objects. Could contain this to
-  --the same x value and just compare y values
-  local objBelow = getBlockAtTilePos(myX, myY+1)
-  if objBelow then
-    self:hitBlock(objBelow)
-  end
 end
 
 function Hero:hitBlock(block)

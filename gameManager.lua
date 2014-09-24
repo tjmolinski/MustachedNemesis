@@ -32,7 +32,7 @@ end
 
 function GameManager:reset()
   self.growBuffer = 0
-  self.growTime = 5000
+  self.growTime = 5
   self.paused = false
   self.gameOver = false
   self.elapsedTime = 0
