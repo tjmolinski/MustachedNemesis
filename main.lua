@@ -7,11 +7,15 @@ require('utils')
 
 screen_shake = 0
 particles = {}
+src1 = love.audio.newSource("sfx/main_song.wav")
 
 function love.load(args)
   gameManager = GameManager.create()
   puzzleBoard = PuzzleBoard.create()
   hero = Hero.create()
+  src1:setVolume(0.9)
+  src1:setLooping(true)
+  src1:play()
 end
 
 function love.update(dt)
